@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+
+# Tools
+.mypy_cache/
+.pytest_cache/
+
+# tox
+.tox/
+
+# local configs
+.env
+*.local.json
+.worktrees
+
+# packaging / testing extras
+*$py.class
+*.egg
+.eggs/
+.coverage
+htmlcov/

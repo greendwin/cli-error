@@ -1,0 +1,43 @@
+[project]
+name = "app-error"
+version = "0.1.0"
+description = "Application error handling and reporting utilities."
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "black",
+    "isort",
+    "tox",
+    "tox-uv",
+]
+test = [
+    "pytest",
+]
+lint = [
+    "black",
+    "isort",
+    "flake8",
+]
+typecheck = [
+    "mypy",
+    "pytest",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/app_error"]
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+strict = true
