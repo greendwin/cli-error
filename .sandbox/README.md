@@ -47,6 +47,10 @@ build when the images already exist.
 Claude credentials live in `~/.claude` / `~/.claude.json` on the host (bind-mounted
 into the container), so authentication persists across container rebuilds.
 
+The host's `~/repo-skills` is bind-mounted **read-only** at `~/repo-skills` inside
+the container as a reference source, so the sandbox can consult it without
+modifying it or leaking container-generated files back onto the host.
+
 ## Daily usage
 
 ```bash

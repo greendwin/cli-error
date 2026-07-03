@@ -19,6 +19,7 @@ services:
       - ./base/zshrc:/home/${USER}/.zshrc:ro
       - ~/.claude:/home/${USER}/.claude
       - ~/.claude.json:/home/${USER}/.claude.json
+      - ~/repo-skills:/home/${USER}/repo-skills:ro
     working_dir: /work
     environment:
       - TERM=xterm-256color
