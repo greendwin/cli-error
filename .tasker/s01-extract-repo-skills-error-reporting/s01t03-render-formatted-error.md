@@ -1,7 +1,7 @@
 ---
 id: s01t03
 slug: render-formatted-error
-status: pending
+status: done
 ---
 
 # Render formatted error
