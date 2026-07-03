@@ -124,3 +124,121 @@ def test_render_error_returns_body_without_error_prefix() -> None:
 
 def test_render_error_of_bare_message_is_just_the_message() -> None:
     assert render_error(CliError("boom").desc) == "boom"
+
+
+def _with_cause(ex: Exception, cause: Exception) -> Exception:
+    ex.__cause__ = cause
+    return ex
+
+
+def _with_context(ex: Exception, context: Exception) -> Exception:
+    ex.__context__ = context
+    return ex
+
+
+def _raise_with_context(*, suppress: bool) -> CliError:
+    try:
+        try:
+            raise ValueError("root")
+        except ValueError:
+            if suppress:
+                raise CliError("top") from None
+            raise CliError("top")  # noqa: B904
+    except CliError as err:
+        return err
+
+
+def test_cli_error_appends_single_cause() -> None:
+    error = _with_cause(CliError("top"), ValueError("root"))
+    assert _render(error).splitlines() == ["Error: top", "  caused by: root"]
+
+
+def test_multi_level_chain_renders_one_line_per_cause_in_order() -> None:
+    mid = _with_cause(RuntimeError("mid"), ValueError("root"))
+    top = _with_cause(CliError("top"), mid)
+    assert _render(top).splitlines() == [
+        "Error: top",
+        "  caused by: mid",
+        "  caused by: root",
+    ]
+
+
+def test_implicit_context_is_surfaced_when_cause_is_none() -> None:
+    error = _raise_with_context(suppress=False)
+    assert _render(error).splitlines() == ["Error: top", "  caused by: root"]
+
+
+def test_explicit_cause_is_preferred_over_context() -> None:
+    error = _with_context(CliError("top"), RuntimeError("context"))
+    error.__cause__ = ValueError("cause")
+    assert _render(error).splitlines() == ["Error: top", "  caused by: cause"]
+
+
+def test_cyclic_chain_terminates_without_repeats() -> None:
+    a = ValueError("a")
+    b = ValueError("b")
+    a.__cause__ = b
+    b.__cause__ = a
+    error = _with_cause(CliError("top"), a)
+    assert _render(error).splitlines() == [
+        "Error: top",
+        "  caused by: a",
+        "  caused by: b",
+    ]
+
+
+def test_cause_str_markup_is_escaped() -> None:
+    error = _with_cause(CliError("top"), ValueError("a[b]c"))
+    assert _render(error).splitlines() == ["Error: top", "  caused by: a[b]c"]
+
+
+def test_non_cli_error_subject_renders_chain() -> None:
+    error = _with_cause(ValueError("boom"), RuntimeError("root"))
+    assert _render(error).splitlines() == ["Error: boom", "  caused by: root"]
+
+
+def test_no_cause_appends_nothing() -> None:
+    assert _render(CliError("top")).splitlines() == ["Error: top"]
+
+
+def test_suppressed_context_is_not_surfaced() -> None:
+    error = _raise_with_context(suppress=True)
+    assert _render(error).splitlines() == ["Error: top"]
+
+
+def test_context_fallback_applies_at_every_link() -> None:
+    mid = _with_context(RuntimeError("mid"), ValueError("root"))
+    top = _with_cause(CliError("top"), mid)
+    assert _render(top).splitlines() == [
+        "Error: top",
+        "  caused by: mid",
+        "  caused by: root",
+    ]
+
+
+def test_cause_chain_follows_the_hint_block() -> None:
+    error = _with_cause(
+        CliError("top").prop_id("id", "abc").hint("try [cmd]--force[/cmd]"),
+        ValueError("root"),
+    )
+    assert _render(error).splitlines() == [
+        "Error: top",
+        "  id: abc",
+        "",
+        "try --force",
+        "  caused by: root",
+    ]
+
+
+def test_cli_error_cause_renders_via_markup_stripped_str() -> None:
+    error = _with_cause(CliError("top"), CliError("root [id]x[/id]"))
+    assert _render(error).splitlines() == [
+        "Error: top",
+        "  caused by: root x",
+    ]
+
+
+def test_self_referential_cause_terminates() -> None:
+    error = CliError("top")
+    error.__cause__ = error
+    assert _render(error).splitlines() == ["Error: top"]
