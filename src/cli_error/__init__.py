@@ -3,6 +3,7 @@
 __all__ = [
     "CliError",
     "CliExit",
+    "ErrorReporter",
     "escape",
     "make_console",
     "print_error",
@@ -15,3 +16,4 @@ from rich.markup import escape
 from ._console import make_console
 from ._errors import CliError, CliExit, print_error
 from ._render import render_error, render_template
+from ._reporter import ErrorReporter
