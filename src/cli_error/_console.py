@@ -12,6 +12,9 @@ _DEFAULT_STYLES = {
 }
 
 
-def make_console() -> Console:
-    """Return a Rich console themed with the default style roles."""
-    return Console(theme=Theme(_DEFAULT_STYLES), highlight=False)
+def make_console(*, stderr: bool = False) -> Console:
+    """Return a Rich console themed with the default style roles.
+
+    Set ``stderr`` to route output to ``sys.stderr`` instead of ``sys.stdout``.
+    """
+    return Console(theme=Theme(_DEFAULT_STYLES), highlight=False, stderr=stderr)

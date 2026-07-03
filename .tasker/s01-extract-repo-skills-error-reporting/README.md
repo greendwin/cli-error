@@ -44,7 +44,7 @@ status: pending
 - [x] [s01t03](s01t03-render-formatted-error.md): Render formatted error
 - [x] [s01t04](s01t04-error-handler-errorreporter-context-manager.md): Error handler (ErrorReporter context manager)
 - [x] [s01t05](s01t05-cause-chain-rendering.md): Cause chain rendering
-- [ ] [s01t06](s01t06-debug-traceback.md): Debug traceback
+- [x] [s01t06](s01t06-debug-traceback.md): Debug traceback
 - [ ] [s01t07](s01t07-console-creation-with-style-overrides.md): Console creation with style overrides
 - [ ] [s01t08](s01t08-library-documentation-readme.md): Library documentation (README)
 - [ ] [s01t09](s01t09-deployment-setup-ci-release-workflows.md): Deployment setup (CI + release workflows)
@@ -53,3 +53,7 @@ status: pending
 - [x] [s01t12](s01t12-revisit-props-markup-first-prop.md): Revisit props: markup-first `prop` with template+args, roles as thin helpers
 - [x] [s01t13](s01t13-store-detail-as-ready-to.md): Store detail as ready-to-print [misc] markup (restore render-seam invariant)
 - [x] [s01t14](s01t14-handle-empty-message-cause-in.md): Handle empty-message cause in cause-chain rendering
+- [ ] [s01t15](s01t15-reconsider-derive-debug-stderr-console.md): Reconsider: derive debug stderr console config from injected console
+- [ ] [s01t16](s01t16-optionally-show-locals-in-debug.md): Optionally show locals in debug traceback
+- [ ] [s01t17](s01t17-test-debug-traceback-includes-the.md): Test: debug traceback includes the exception cause chain
+- [ ] [s01t18](s01t18-add-debug-gated-diagnostic-helpers.md): Add debug-gated diagnostic helpers to ErrorReporter (debug_traceback / debug_cmd / debug_output)
