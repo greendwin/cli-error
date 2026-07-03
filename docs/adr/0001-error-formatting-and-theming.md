@@ -20,11 +20,15 @@ must not be able to break or inject terminal markup.
   transitively required by Typer). A project that never applies the theme still
   works: undefined tokens render as plain text with no exception, even on a
   color terminal.
-- **Format-template + escaped args.** A `CliError` message is a trusted template
-  whose markup is authored by the developer; dynamic values are passed as
-  arguments and escaped before substitution, so untrusted data is safe by
-  default. Values interpolated inline (not passed as args) are the caller's
-  responsibility to escape.
+- **Format-template + escaped args.** Every trusted-markup surface — a `CliError`
+  message, a `CliError.hint`, and a `CliExit` message — is a template whose markup
+  is authored by the developer; dynamic values are passed as arguments and escaped
+  before substitution, so untrusted data is safe by default. A single shared helper
+  owns this substitution: arg-free calls store the template verbatim (literal
+  `{...}` braces need no escaping), and any arg switches the template into
+  `str.format` mode with each value `escape(str(value))`-substituted. Values
+  interpolated inline (not passed as args) are the caller's responsibility to
+  escape.
 - **Fluent, typed builder for context.** Context is attached via chained,
   per-role methods (`prop_id`, `prop_path`, `prop_data`, `prop_cmd`,
   `prop_misc`), a role-less `prop`, a `hint`, and a keyless `detail` block. Each
@@ -48,3 +52,7 @@ must not be able to break or inject terminal markup.
   mechanical simplification.
 - One place (`ErrorReporter`) owns the render layout, so formatting stays uniform
   across every tool that adopts the library.
+- Extending the format-template + escaped-args model to `CliExit` supersedes the
+  `s01t01` decision that "`CliExit` is just an exception storing a plain
+  (markup-capable) message." `CliExit` now accepts the same `(template, **args)`
+  contract as `CliError`, with untrusted args escaped by the shared helper.
