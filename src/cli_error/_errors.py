@@ -1,6 +1,7 @@
 from typing import Any, Self
 
 from rich.console import Console
+from rich.markup import escape
 
 from ._render import (
     ErrorDesc,
@@ -45,7 +46,6 @@ class CliError(Exception):
         return self.prop(key, "[misc]{value}[/misc]", value=value)
 
     def __str__(self) -> str:
-        # TODO: TBD: should we include here `props` and `hint`?
         return strip_markup(self.desc.message)
 
 
@@ -61,9 +61,23 @@ class CliExit(Exception):
 
 
 def print_error(ex: Exception, console: Console) -> None:
-    if not isinstance(ex, CliError):
+    if isinstance(ex, CliError):
+        console.print(f"[err]Error:[/err] {render_error(ex.desc)}")
+    else:
         console.print(render_template("[err]Error:[/err] {ex}", ex=ex))
-        return
 
-    console.print(f"[err]Error:[/err] {render_error(ex.desc)}")
-    return
+    seen = {id(ex)}
+    cause = _next_link(ex)
+    while cause is not None and id(cause) not in seen:
+        # note: markup-stripped for CliError via its __str__,
+        # not the full props/detail/hint layout
+        console.print(f"  caused by: {escape(str(cause))}")
+        seen.add(id(cause))
+        cause = _next_link(cause)
+
+
+def _next_link(exc: BaseException) -> BaseException | None:
+    if exc.__cause__ is not None:
+        return exc.__cause__
+
+    return None if exc.__suppress_context__ else exc.__context__

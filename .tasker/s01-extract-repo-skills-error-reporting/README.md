@@ -43,7 +43,7 @@ status: pending
 - [x] [s01t02](s01t02-fluent-builder-for-clierror-context.md): Fluent builder for CliError context
 - [x] [s01t03](s01t03-render-formatted-error.md): Render formatted error
 - [x] [s01t04](s01t04-error-handler-errorreporter-context-manager.md): Error handler (ErrorReporter context manager)
-- [ ] [s01t05](s01t05-cause-chain-rendering.md): Cause chain rendering
+- [x] [s01t05](s01t05-cause-chain-rendering.md): Cause chain rendering
 - [ ] [s01t06](s01t06-debug-traceback.md): Debug traceback
 - [ ] [s01t07](s01t07-console-creation-with-style-overrides.md): Console creation with style overrides
 - [ ] [s01t08](s01t08-library-documentation-readme.md): Library documentation (README)
@@ -52,3 +52,4 @@ status: pending
 - [x] [s01t11](s01t11-refine-detail-single-last-wins.md): Refine detail — single last-wins str block
 - [x] [s01t12](s01t12-revisit-props-markup-first-prop.md): Revisit props: markup-first `prop` with template+args, roles as thin helpers
 - [x] [s01t13](s01t13-store-detail-as-ready-to.md): Store detail as ready-to-print [misc] markup (restore render-seam invariant)
+- [ ] [s01t14](s01t14-handle-empty-message-cause-in.md): Handle empty-message cause in cause-chain rendering
