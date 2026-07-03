@@ -1,7 +1,7 @@
 from rich.console import Console
 from rich.theme import Theme
 
-from cli_error import CliError, make_console, print_error
+from cli_error import CliError, make_console, print_error, render_error
 
 
 def _render(ex: Exception) -> str:
@@ -104,3 +104,23 @@ def test_detail_without_hint_has_no_trailing_or_leading_blank_line() -> None:
 def test_duplicate_prop_key_renders_last_value_in_original_slot() -> None:
     error = CliError("m").prop_id("k", "a").prop_id("k", "b")
     assert _render(error).splitlines() == ["Error: m", "  k: b"]
+
+
+def test_render_error_returns_body_without_error_prefix() -> None:
+    error = (
+        CliError("bad [id]thing[/id]")
+        .prop_id("id", "abc")
+        .detail("some output")
+        .hint("try [cmd]--force[/cmd]")
+    )
+    assert render_error(error.desc).splitlines() == [
+        "bad [id]thing[/id]",
+        "  id: [id]abc[/id]",
+        "[misc]some output[/misc]",
+        "",
+        "try [cmd]--force[/cmd]",
+    ]
+
+
+def test_render_error_of_bare_message_is_just_the_message() -> None:
+    assert render_error(CliError("boom").desc) == "boom"

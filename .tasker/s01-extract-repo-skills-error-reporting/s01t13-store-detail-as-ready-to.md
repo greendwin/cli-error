@@ -1,7 +1,7 @@
 ---
 id: s01t13
 slug: store-detail-as-ready-to
-status: pending
+status: done
 ---
 
 # Store detail as ready-to-print [misc] markup (restore render-seam invariant)

@@ -1,11 +1,8 @@
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from typing import Any
 
 from rich.markup import escape
-
-
-class Printer(Protocol):
-    def print(self, text: str, /) -> None: ...
+from rich.text import Text
 
 
 @dataclass
@@ -16,18 +13,21 @@ class ErrorDesc:
     hint: str = ""
 
 
-def render_error(desc: ErrorDesc, output: Printer) -> None:
-    output.print(f"[err]Error:[/err] {desc.message}")
+def render_error(desc: ErrorDesc) -> str:
+    r = []
+    r.append(desc.message)
 
     for key, value in desc.props.items():
-        output.print(f"  {escape(key)}: {value}")
+        r.append(f"  {escape(key)}: {value}")
 
     if desc.detail:
-        output.print(f"[misc]{desc.detail}[/misc]")
+        r.append(desc.detail)
 
     if desc.hint:
-        output.print("")
-        output.print(desc.hint)
+        r.append("")
+        r.append(desc.hint)
+
+    return "\n".join(r)
 
 
 def render_template(template: str, **args: Any) -> str:
@@ -35,3 +35,7 @@ def render_template(template: str, **args: Any) -> str:
         return template
 
     return template.format(**{key: escape(str(value)) for key, value in args.items()})
+
+
+def strip_markup(text: str) -> str:
+    return Text.from_markup(text).plain

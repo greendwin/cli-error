@@ -51,4 +51,4 @@ status: pending
 - [x] [s01t10](s01t10-unify-markup-construction-template-args.md): Unify markup construction — template + args for hint and CliExit
 - [x] [s01t11](s01t11-refine-detail-single-last-wins.md): Refine detail — single last-wins str block
 - [x] [s01t12](s01t12-revisit-props-markup-first-prop.md): Revisit props: markup-first `prop` with template+args, roles as thin helpers
-- [ ] [s01t13](s01t13-store-detail-as-ready-to.md): Store detail as ready-to-print [misc] markup (restore render-seam invariant)
+- [x] [s01t13](s01t13-store-detail-as-ready-to.md): Store detail as ready-to-print [misc] markup (restore render-seam invariant)
