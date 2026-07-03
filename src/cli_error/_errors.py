@@ -64,16 +64,25 @@ def print_error(ex: Exception, console: Console) -> None:
     if isinstance(ex, CliError):
         console.print(f"[err]Error:[/err] {render_error(ex.desc)}")
     else:
-        console.print(render_template("[err]Error:[/err] {ex}", ex=ex))
+        console.print(
+            render_template("[err]Error:[/err] {ex}", ex=_message_or_type(ex))
+        )
 
     seen = {id(ex)}
     cause = _next_link(ex)
     while cause is not None and id(cause) not in seen:
         # note: markup-stripped for CliError via its __str__,
         # not the full props/detail/hint layout
-        console.print(f"  caused by: {escape(str(cause))}")
+        console.print(f"  caused by: {escape(_message_or_type(cause))}")
         seen.add(id(cause))
         cause = _next_link(cause)
+
+
+def _message_or_type(exc: BaseException) -> str:
+    text = str(exc)
+    if text.strip():
+        return text
+    return type(exc).__name__
 
 
 def _next_link(exc: BaseException) -> BaseException | None:
