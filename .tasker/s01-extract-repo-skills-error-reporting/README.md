@@ -45,7 +45,7 @@ status: pending
 - [x] [s01t04](s01t04-error-handler-errorreporter-context-manager.md): Error handler (ErrorReporter context manager)
 - [x] [s01t05](s01t05-cause-chain-rendering.md): Cause chain rendering
 - [x] [s01t06](s01t06-debug-traceback.md): Debug traceback
-- [ ] [s01t07](s01t07-console-creation-with-style-overrides.md): Console creation with style overrides
+- [x] [s01t07](s01t07-console-creation-with-style-overrides.md): Console creation with style overrides
 - [ ] [s01t08](s01t08-library-documentation-readme.md): Library documentation (README)
 - [ ] [s01t09](s01t09-deployment-setup-ci-release-workflows.md): Deployment setup (CI + release workflows)
 - [x] [s01t10](s01t10-unify-markup-construction-template-args.md): Unify markup construction — template + args for hint and CliExit
@@ -57,3 +57,4 @@ status: pending
 - [ ] [s01t16](s01t16-optionally-show-locals-in-debug.md): Optionally show locals in debug traceback
 - [ ] [s01t17](s01t17-test-debug-traceback-includes-the.md): Test: debug traceback includes the exception cause chain
 - [ ] [s01t18](s01t18-add-debug-gated-diagnostic-helpers.md): Add debug-gated diagnostic helpers to ErrorReporter (debug_traceback / debug_cmd / debug_output)
+- [ ] [s01t19](s01t19-consolidate-shared-test-helpers-across.md): Consolidate shared test helpers across test modules
