@@ -7,22 +7,13 @@ dependencies = ["rich"]
 
 [dependency-groups]
 dev = [
-    "black",
-    "isort",
-    "tox",
-    "tox-uv",
-]
-test = [
-    "pytest",
-]
-lint = [
+    "mypy",
+    "pytest>=9.1.1",
     "black",
     "isort",
     "flake8",
-]
-typecheck = [
-    "mypy",
-    "pytest",
+    "tox",
+    "tox-uv",
 ]
 
 [build-system]
