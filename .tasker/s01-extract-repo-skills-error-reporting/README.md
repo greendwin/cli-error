@@ -42,7 +42,7 @@ status: pending
 - [x] [s01t01](s01t01-rename-package-structure-clierror-cliexit.md): Rename package, structure, CliError/CliExit types
 - [x] [s01t02](s01t02-fluent-builder-for-clierror-context.md): Fluent builder for CliError context
 - [x] [s01t03](s01t03-render-formatted-error.md): Render formatted error
-- [ ] [s01t04](s01t04-error-handler-errorreporter-context-manager.md): Error handler (ErrorReporter context manager)
+- [x] [s01t04](s01t04-error-handler-errorreporter-context-manager.md): Error handler (ErrorReporter context manager)
 - [ ] [s01t05](s01t05-cause-chain-rendering.md): Cause chain rendering
 - [ ] [s01t06](s01t06-debug-traceback.md): Debug traceback
 - [ ] [s01t07](s01t07-console-creation-with-style-overrides.md): Console creation with style overrides

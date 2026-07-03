@@ -1,7 +1,7 @@
 ---
 id: s01t04
 slug: error-handler-errorreporter-context-manager
-status: pending
+status: done
 ---
 
 # Error handler (ErrorReporter context manager)
