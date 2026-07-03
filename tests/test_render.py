@@ -42,6 +42,14 @@ def test_non_cli_error_message_is_escaped() -> None:
     assert _render(ValueError("a[b]c")).strip() == "Error: a[b]c"
 
 
+def test_empty_non_cli_error_falls_back_to_type_name() -> None:
+    assert _render(ValueError()).splitlines() == ["Error: ValueError"]
+
+
+def test_whitespace_only_non_cli_error_falls_back_to_type_name() -> None:
+    assert _render(ValueError("   ")).splitlines() == ["Error: ValueError"]
+
+
 def test_prop_value_key_and_detail_render_brackets_literally() -> None:
     error = CliError("m").prop_id("a[b]", "x[y]").detail("d[e]")
     out = _render(error)
@@ -134,6 +142,10 @@ def _with_cause(ex: Exception, cause: Exception) -> Exception:
 def _with_context(ex: Exception, context: Exception) -> Exception:
     ex.__context__ = context
     return ex
+
+
+class _FooError(CliError):
+    pass
 
 
 def _raise_with_context(*, suppress: bool) -> CliError:
@@ -236,6 +248,42 @@ def test_cli_error_cause_renders_via_markup_stripped_str() -> None:
         "Error: top",
         "  caused by: root x",
     ]
+
+
+def test_empty_cause_falls_back_to_type_name() -> None:
+    error = _with_cause(CliError("top"), ValueError())
+    assert _render(error).splitlines() == ["Error: top", "  caused by: ValueError"]
+
+
+def test_empty_mid_chain_cause_falls_back_to_type_name() -> None:
+    error = _with_cause(
+        CliError("top"), _with_cause(ValueError(), RuntimeError("root"))
+    )
+    assert _render(error).splitlines() == [
+        "Error: top",
+        "  caused by: ValueError",
+        "  caused by: root",
+    ]
+
+
+def test_whitespace_only_cause_falls_back_to_type_name() -> None:
+    error = _with_cause(CliError("top"), ValueError("   "))
+    assert _render(error).splitlines() == ["Error: top", "  caused by: ValueError"]
+
+
+def test_empty_cli_error_cause_falls_back_to_type_name() -> None:
+    error = _with_cause(CliError("top"), CliError(""))
+    assert _render(error).splitlines() == ["Error: top", "  caused by: CliError"]
+
+
+def test_empty_context_cause_falls_back_to_type_name() -> None:
+    error = _with_context(CliError("top"), ValueError())
+    assert _render(error).splitlines() == ["Error: top", "  caused by: ValueError"]
+
+
+def test_empty_cli_error_subclass_cause_falls_back_to_subclass_name() -> None:
+    error = _with_cause(CliError("top"), _FooError(""))
+    assert _render(error).splitlines() == ["Error: top", "  caused by: _FooError"]
 
 
 def test_self_referential_cause_terminates() -> None:

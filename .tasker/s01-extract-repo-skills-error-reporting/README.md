@@ -52,4 +52,4 @@ status: pending
 - [x] [s01t11](s01t11-refine-detail-single-last-wins.md): Refine detail — single last-wins str block
 - [x] [s01t12](s01t12-revisit-props-markup-first-prop.md): Revisit props: markup-first `prop` with template+args, roles as thin helpers
 - [x] [s01t13](s01t13-store-detail-as-ready-to.md): Store detail as ready-to-print [misc] markup (restore render-seam invariant)
-- [ ] [s01t14](s01t14-handle-empty-message-cause-in.md): Handle empty-message cause in cause-chain rendering
+- [x] [s01t14](s01t14-handle-empty-message-cause-in.md): Handle empty-message cause in cause-chain rendering
