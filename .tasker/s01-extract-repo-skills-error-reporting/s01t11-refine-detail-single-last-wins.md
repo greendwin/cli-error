@@ -1,7 +1,7 @@
 ---
 id: s01t11
 slug: refine-detail-single-last-wins
-status: pending
+status: done
 ---
 
 # Refine detail — single last-wins str block

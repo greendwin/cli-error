@@ -1,5 +1,3 @@
-from collections.abc import Callable
-
 import pytest
 from rich.console import Console
 
@@ -165,26 +163,20 @@ class _Markup:
         return "x[y]"
 
 
-@pytest.mark.parametrize(
-    ("store", "read"),
-    [
-        (lambda e, v: e.prop_data("k", v), lambda e: e.props[0].value),
-        (lambda e, v: e.detail(v), lambda e: e.details[0]),
-    ],
-)
-def test_non_str_value_is_stringified_then_escaped(
-    store: Callable[[CliError, object], object],
-    read: Callable[[CliError], str],
-    error: CliError,
-) -> None:
+def test_prop_data_non_str_value_is_stringified_then_escaped(error: CliError) -> None:
     value = _Markup()
-    store(error, value)
-    assert read(error) == escape(str(value))
+    error.prop_data("k", value)
+    assert error.props[0].value == escape(str(value))
 
 
-def test_detail_is_escaped_and_ordered(error: CliError) -> None:
-    error.detail("a[b]c").detail("plain")
-    assert error.details == [escape("a[b]c"), "plain"]
+def test_detail_is_escaped_at_store(error: CliError) -> None:
+    error.detail("a[b]c")
+    assert error.detail_text == escape("a[b]c")
+
+
+def test_detail_last_wins(error: CliError) -> None:
+    error.detail("first").detail("a[b]c")
+    assert error.detail_text == escape("a[b]c")
 
 
 def test_hint_is_stored_verbatim(error: CliError) -> None:
@@ -225,7 +217,7 @@ def test_arbitrary_chaining_order_works(error: CliError) -> None:
     assert result is error
     assert error.hint_text == "h"
     assert [p.key for p in error.props] == ["k", "x"]
-    assert error.details == ["d"]
+    assert error.detail_text == "d"
 
 
 def test_building_does_not_alter_message_or_str() -> None:
@@ -238,5 +230,5 @@ def test_building_does_not_alter_message_or_str() -> None:
 
 def test_fresh_error_has_empty_containers(error: CliError) -> None:
     assert error.props == []
-    assert error.details == []
+    assert error.detail_text is None
     assert error.hint_text is None
