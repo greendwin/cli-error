@@ -23,16 +23,15 @@ class CliError(Exception):
         #       should we trust a user to that each prop will be in the same
         #       order everywheere? sshould we blame duplicates?
         self.props: list[Prop] = []
-        self.details: list[str] = []
+        self.detail_text: str | None = None
         self.hint_text: str | None = None
 
     def hint(self, template: str, **args: Any) -> Self:
         self.hint_text = _resolve_template(template, args)
         return self
 
-    def detail(self, text: Any) -> Self:
-        # TODO: do we need `Any`? why not str?
-        self.details.append(escape(str(text)))
+    def detail(self, text: str) -> Self:
+        self.detail_text = escape(text)
         return self
 
     def prop(self, key: str, value: Any) -> Self:
