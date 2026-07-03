@@ -1,9 +1,9 @@
 [project]
-name = "app-error"
+name = "cli-error"
 version = "0.1.0"
-description = "Application error handling and reporting utilities."
+description = "Error handling and reporting utilities for CLI applications."
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["rich"]
 
 [dependency-groups]
 dev = [
@@ -30,7 +30,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/app_error"]
+packages = ["src/cli_error"]
 
 [tool.black]
 line-length = 88

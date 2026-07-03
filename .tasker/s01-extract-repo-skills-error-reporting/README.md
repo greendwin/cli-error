@@ -39,7 +39,7 @@ status: pending
 
 ## Subtasks
 
-- [ ] [s01t01](s01t01-rename-package-structure-clierror-cliexit.md): Rename package, structure, CliError/CliExit types
+- [x] [s01t01](s01t01-rename-package-structure-clierror-cliexit.md): Rename package, structure, CliError/CliExit types
 - [ ] [s01t02](s01t02-fluent-builder-for-clierror-context.md): Fluent builder for CliError context
 - [ ] [s01t03](s01t03-render-formatted-error.md): Render formatted error
 - [ ] [s01t04](s01t04-error-handler-errorreporter-context-manager.md): Error handler (ErrorReporter context manager)

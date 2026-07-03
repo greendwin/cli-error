@@ -1,7 +1,7 @@
 ---
 id: s01t01
 slug: rename-package-structure-clierror-cliexit
-status: pending
+status: done
 ---
 
 # Rename package, structure, CliError/CliExit types

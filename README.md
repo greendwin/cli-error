@@ -1,6 +1,6 @@
-# app-error
+# cli-error
 
-Application error handling and reporting utilities.
+Error handling and reporting utilities for CLI applications.
 
 ## Getting started
 
@@ -18,9 +18,14 @@ uv sync
 ### Usage
 
 ```python
-from app_error import greet
+from cli_error import CliError, CliExit, escape, make_console
 
-print(greet("World"))  # Hello, World!
+console = make_console()
+
+try:
+    raise CliError("cannot read [id]{commit}[/id]", commit="a[b]c")
+except CliError as error:
+    console.print(f"[err]Error:[/err] {error.message}")
 ```
 
 ### Testing
