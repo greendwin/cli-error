@@ -1,10 +1,13 @@
 from typing import Any, Self
 
 from rich.console import Console
-from rich.markup import escape
-from rich.text import Text
 
-from ._render import ErrorDesc, render_error, render_template
+from ._render import (
+    ErrorDesc,
+    render_error,
+    render_template,
+    strip_markup,
+)
 
 
 class CliError(Exception):
@@ -19,7 +22,7 @@ class CliError(Exception):
         return self
 
     def detail(self, text: str) -> Self:
-        self.desc.detail = escape(text)
+        self.desc.detail = render_template("[misc]{detail}[/misc]", detail=text)
         return self
 
     def prop(self, key: str, template: str, **args: Any) -> Self:
@@ -42,8 +45,8 @@ class CliError(Exception):
         return self.prop(key, "[misc]{value}[/misc]", value=value)
 
     def __str__(self) -> str:
-        # TODO: use `render_error` with supressed formats
-        return _markup_to_str(self.desc.message)
+        # TODO: TBD: should we include here `props` and `hint`?
+        return strip_markup(self.desc.message)
 
 
 class CliExit(Exception):
@@ -54,11 +57,7 @@ class CliExit(Exception):
         super().__init__(self.message)
 
     def __str__(self) -> str:
-        return _markup_to_str(self.message)
-
-
-def _markup_to_str(rich_text: str) -> str:
-    return Text.from_markup(rich_text).plain
+        return strip_markup(self.message)
 
 
 def print_error(ex: Exception, console: Console) -> None:
@@ -66,5 +65,5 @@ def print_error(ex: Exception, console: Console) -> None:
         console.print(render_template("[err]Error:[/err] {ex}", ex=ex))
         return
 
-    render_error(ex.desc, console)
+    console.print(f"[err]Error:[/err] {render_error(ex.desc)}")
     return

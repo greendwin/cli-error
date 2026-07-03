@@ -199,12 +199,12 @@ def test_prop_data_non_str_value_is_stringified_then_escaped(error: CliError) ->
 
 def test_detail_is_escaped_at_store(error: CliError) -> None:
     error.detail("a[b]c")
-    assert error.desc.detail == escape("a[b]c")
+    assert error.desc.detail == f"[misc]{escape('a[b]c')}[/misc]"
 
 
 def test_detail_last_wins(error: CliError) -> None:
     error.detail("first").detail("a[b]c")
-    assert error.desc.detail == escape("a[b]c")
+    assert error.desc.detail == f"[misc]{escape('a[b]c')}[/misc]"
 
 
 def test_hint_is_stored_verbatim(error: CliError) -> None:
@@ -245,7 +245,7 @@ def test_arbitrary_chaining_order_works(error: CliError) -> None:
     assert result is error
     assert error.desc.hint == "h"
     assert list(error.desc.props) == ["k", "x"]
-    assert error.desc.detail == "d"
+    assert error.desc.detail == "[misc]d[/misc]"
 
 
 def test_building_does_not_alter_message_or_str() -> None:
