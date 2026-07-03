@@ -41,7 +41,7 @@ status: pending
 
 - [x] [s01t01](s01t01-rename-package-structure-clierror-cliexit.md): Rename package, structure, CliError/CliExit types
 - [x] [s01t02](s01t02-fluent-builder-for-clierror-context.md): Fluent builder for CliError context
-- [ ] [s01t03](s01t03-render-formatted-error.md): Render formatted error
+- [x] [s01t03](s01t03-render-formatted-error.md): Render formatted error
 - [ ] [s01t04](s01t04-error-handler-errorreporter-context-manager.md): Error handler (ErrorReporter context manager)
 - [ ] [s01t05](s01t05-cause-chain-rendering.md): Cause chain rendering
 - [ ] [s01t06](s01t06-debug-traceback.md): Debug traceback
@@ -51,3 +51,4 @@ status: pending
 - [x] [s01t10](s01t10-unify-markup-construction-template-args.md): Unify markup construction — template + args for hint and CliExit
 - [x] [s01t11](s01t11-refine-detail-single-last-wins.md): Refine detail — single last-wins str block
 - [x] [s01t12](s01t12-revisit-props-markup-first-prop.md): Revisit props: markup-first `prop` with template+args, roles as thin helpers
+- [ ] [s01t13](s01t13-store-detail-as-ready-to.md): Store detail as ready-to-print [misc] markup (restore render-seam invariant)

@@ -1,30 +1,29 @@
 from typing import Any, Self
 
+from rich.console import Console
 from rich.markup import escape
 from rich.text import Text
+
+from ._render import ErrorDesc, render_error, render_template
 
 
 class CliError(Exception):
     """An application error carrying a Rich-markup message."""
 
     def __init__(self, template: str, **args: Any) -> None:
-        self._message = _resolve_template(template, args)
-        super().__init__(self._message)
-
-        self._props: dict[str, str] = {}  # key: prop-name, value: rich text
-        self._detail_text: str | None = None
-        self._hint_text: str | None = None
+        self.desc = ErrorDesc(render_template(template, **args))
+        super().__init__(self.desc.message)
 
     def hint(self, template: str, **args: Any) -> Self:
-        self._hint_text = _resolve_template(template, args)
+        self.desc.hint = render_template(template, **args)
         return self
 
     def detail(self, text: str) -> Self:
-        self._detail_text = escape(text)
+        self.desc.detail = escape(text)
         return self
 
     def prop(self, key: str, template: str, **args: Any) -> Self:
-        self._props[key] = _resolve_template(template, args)
+        self.desc.props[key] = render_template(template, **args)
         return self
 
     def prop_id(self, key: str, value: Any) -> Self:
@@ -43,26 +42,29 @@ class CliError(Exception):
         return self.prop(key, "[misc]{value}[/misc]", value=value)
 
     def __str__(self) -> str:
-        return _markup_to_str(self._message)
+        # TODO: use `render_error` with supressed formats
+        return _markup_to_str(self.desc.message)
 
 
 class CliExit(Exception):
     """A clean-exit signal carrying a message."""
 
     def __init__(self, template: str, **args: Any) -> None:
-        self.message = _resolve_template(template, args)
+        self.message = render_template(template, **args)
         super().__init__(self.message)
 
     def __str__(self) -> str:
         return _markup_to_str(self.message)
 
 
-def _resolve_template(template: str, args: dict[str, Any]) -> str:
-    if not args:
-        return template
-
-    return template.format(**{key: escape(str(value)) for key, value in args.items()})
-
-
 def _markup_to_str(rich_text: str) -> str:
     return Text.from_markup(rich_text).plain
+
+
+def print_error(ex: Exception, console: Console) -> None:
+    if not isinstance(ex, CliError):
+        console.print(render_template("[err]Error:[/err] {ex}", ex=ex))
+        return
+
+    render_error(ex.desc, console)
+    return
