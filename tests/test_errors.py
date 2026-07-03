@@ -89,9 +89,26 @@ def test_cli_exit_missing_placeholder_raises() -> None:
 def test_make_console_returns_console() -> None:
     console = make_console()
     assert isinstance(console, Console)
+    assert console.stderr is False
     with console.capture() as capture:
         console.print("[err]x[/err]")
     assert "x" in capture.get()
+
+
+def test_make_console_stderr_variant_sets_flag_and_is_themed() -> None:
+    console = make_console(stderr=True)
+    assert console.stderr is True
+    assert console.get_style("err").color is not None
+
+
+def test_make_console_stderr_routes_to_process_stderr(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    console = make_console(stderr=True)
+    console.print("routed")
+    captured = capsys.readouterr()
+    assert "routed" in captured.err
+    assert "routed" not in captured.out
 
 
 def test_make_console_wires_default_style_palette() -> None:

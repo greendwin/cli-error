@@ -1,7 +1,7 @@
 ---
 id: s01t06
 slug: debug-traceback
-status: pending
+status: done
 ---
 
 # Debug traceback
