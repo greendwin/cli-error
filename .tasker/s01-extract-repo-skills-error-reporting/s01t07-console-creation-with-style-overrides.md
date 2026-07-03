@@ -1,7 +1,7 @@
 ---
 id: s01t07
 slug: console-creation-with-style-overrides
-status: pending
+status: done
 ---
 
 # Console creation with style overrides
