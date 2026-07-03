@@ -58,6 +58,29 @@ def test_cli_exit_carries_message() -> None:
     assert str(exit_signal) == "done"
 
 
+def test_cli_exit_args_are_escaped_and_template_markup_preserved() -> None:
+    exit_signal = CliExit("in [id]{commit}[/id]", commit="a[b]c")
+    assert escape("a[b]c") in exit_signal.message
+    assert "[id]" in exit_signal.message
+    assert "[/id]" in exit_signal.message
+    assert str(exit_signal) == "in a[b]c"
+
+
+def test_cli_exit_str_strips_markup_from_resolved_message() -> None:
+    exit_signal = CliExit("in [id]{commit}[/id]", commit="a[b]c")
+    assert str(exit_signal) == "in a[b]c"
+
+
+def test_cli_exit_no_arg_construction_keeps_braces_verbatim() -> None:
+    exit_signal = CliExit("plain {value} message")
+    assert exit_signal.message == "plain {value} message"
+
+
+def test_cli_exit_missing_placeholder_raises() -> None:
+    with pytest.raises(KeyError):
+        CliExit("need [id]{name}[/id]", other="x")
+
+
 def test_make_console_returns_console() -> None:
     console = make_console()
     assert isinstance(console, Console)
@@ -169,9 +192,32 @@ def test_hint_is_stored_verbatim(error: CliError) -> None:
     assert error.hint_text == "see [id]main[/id]"
 
 
+def test_hint_no_arg_construction_keeps_braces_verbatim(error: CliError) -> None:
+    error.hint("use {ref} syntax")
+    assert error.hint_text == "use {ref} syntax"
+
+
 def test_hint_last_wins(error: CliError) -> None:
     error.hint("first").hint("second")
     assert error.hint_text == "second"
+
+
+def test_hint_args_are_escaped_and_template_markup_preserved(error: CliError) -> None:
+    error.hint("see [id]{commit}[/id]", commit="a[b]c")
+    assert error.hint_text is not None
+    assert escape("a[b]c") in error.hint_text
+    assert "[id]" in error.hint_text
+    assert "[/id]" in error.hint_text
+
+
+def test_hint_last_wins_with_args(error: CliError) -> None:
+    error.hint("first {x}", x="1").hint("second {y}", y="2")
+    assert error.hint_text == "second 2"
+
+
+def test_hint_missing_placeholder_raises(error: CliError) -> None:
+    with pytest.raises(KeyError):
+        error.hint("need [id]{name}[/id]", other="x")
 
 
 def test_arbitrary_chaining_order_works(error: CliError) -> None:
