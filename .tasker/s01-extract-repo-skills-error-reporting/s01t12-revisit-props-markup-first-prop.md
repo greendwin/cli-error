@@ -1,7 +1,7 @@
 ---
 id: s01t12
 slug: revisit-props-markup-first-prop
-status: pending
+status: done
 ---
 
 # Revisit props: markup-first `prop` with template+args, roles as thin helpers
