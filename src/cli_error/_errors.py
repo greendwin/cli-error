@@ -1,7 +1,17 @@
-from typing import Any
+from typing import Any, Literal, NamedTuple, Self, TypeAlias
 
 from rich.markup import escape
 from rich.text import Text
+
+Role: TypeAlias = Literal["id", "path", "data", "cmd", "misc"]
+
+
+class _Prop(NamedTuple):
+    """A single rendered property: verbatim key, escaped value, optional role."""
+
+    key: str
+    value: str
+    role: Role | None
 
 
 class CliError(Exception):
@@ -25,15 +35,58 @@ class CliError(Exception):
         else:
             self.message = template
 
+        self.props: list[_Prop] = []
+        self.details: list[str] = []
+        self.hint_text: str | None = None
+
         super().__init__(self.message)
 
     def __str__(self) -> str:
         return Text.from_markup(self.message).plain
+
+    def _add_prop(
+        self,
+        key: str,
+        value: Any,
+        role: Role | None,
+    ) -> Self:
+        self.props.append(_Prop(key, escape(str(value)), role))
+        return self
+
+    def prop_id(self, key: str, value: Any) -> Self:
+        return self._add_prop(key, value, "id")
+
+    def prop_path(self, key: str, value: Any) -> Self:
+        return self._add_prop(key, value, "path")
+
+    def prop_data(self, key: str, value: Any) -> Self:
+        return self._add_prop(key, value, "data")
+
+    def prop_cmd(self, key: str, value: Any) -> Self:
+        return self._add_prop(key, value, "cmd")
+
+    def prop_misc(self, key: str, value: Any) -> Self:
+        return self._add_prop(key, value, "misc")
+
+    def prop(self, key: str, value: Any) -> Self:
+        return self._add_prop(key, value, None)
+
+    def hint(self, text: str) -> Self:
+        # TODO: compose same as `CliExport` constr (template and args with escape)
+        # TODO: why hint replaces prev val, but `detail` appends?
+        self.hint_text = text
+        return self
+
+    def detail(self, text: Any) -> Self:
+        # TODO: do we need `Any`? why not str?
+        self.details.append(escape(str(text)))
+        return self
 
 
 class CliExit(Exception):
     """A clean-exit signal carrying a message."""
 
     def __init__(self, message: str) -> None:
+        # TODO: lets support `template` and `args` with escape
         super().__init__(message)
         self.message = message

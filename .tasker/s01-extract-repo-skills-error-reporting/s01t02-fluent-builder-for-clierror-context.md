@@ -1,7 +1,7 @@
 ---
 id: s01t02
 slug: fluent-builder-for-clierror-context
-status: pending
+status: done
 ---
 
 # Fluent builder for CliError context
