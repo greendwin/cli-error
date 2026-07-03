@@ -20,3 +20,5 @@ See `CONTEXT.md` for project terminology (source, skill, provider, etc.).
 
 Task-coupled skills read `docs/agents/task-tracker.md` to resolve task-tracker verbs and statuses.
 
+`dev-loop` reads `docs/agents/dev-loop.md` to resolve the reviewer rosters.
+
