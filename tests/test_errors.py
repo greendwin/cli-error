@@ -4,6 +4,13 @@ from rich.console import Console
 from cli_error import CliError, CliExit, escape, make_console
 
 PROP_METHODS = ["prop_id", "prop_path", "prop_data", "prop_cmd", "prop_misc", "prop"]
+PROP_HELPERS = {
+    "prop_id": "id",
+    "prop_path": "path",
+    "prop_data": "data",
+    "prop_cmd": "cmd",
+    "prop_misc": "misc",
+}
 
 
 @pytest.fixture
@@ -24,9 +31,9 @@ def test_escape_re_export_escapes_open_bracket() -> None:
 
 def test_args_are_escaped_and_template_markup_preserved() -> None:
     error = CliError("in [id]{commit}[/id]", commit="a[b]c")
-    assert escape("a[b]c") in error.message
-    assert "[id]" in error.message
-    assert "[/id]" in error.message
+    assert escape("a[b]c") in error._message
+    assert "[id]" in error._message
+    assert "[/id]" in error._message
 
 
 def test_str_strips_markup_from_resolved_message() -> None:
@@ -40,13 +47,13 @@ def test_str_of_plain_message() -> None:
 
 def test_no_arg_construction_keeps_braces_verbatim() -> None:
     error = CliError("plain {value} message")
-    assert error.message == "plain {value} message"
+    assert error._message == "plain {value} message"
     assert str(error) == "plain {value} message"
 
 
 def test_literal_braces_use_double_brace_escaping() -> None:
     error = CliError("show {{literal}} for [id]{name}[/id]", name="x")
-    assert "{literal}" in error.message
+    assert "{literal}" in error._message
     assert str(error) == "show {literal} for x"
 
 
@@ -108,54 +115,75 @@ def test_builder_methods_return_self(error: CliError) -> None:
     assert error.detail("d") is error
 
 
-def test_typed_props_tag_correct_role(error: CliError) -> None:
+def test_prop_helpers_wrap_value_in_role_markup(error: CliError) -> None:
     error.prop_id("a", "1")
     error.prop_path("b", "2")
     error.prop_data("c", "3")
     error.prop_cmd("d", "4")
     error.prop_misc("e", "5")
-    roles = [(p.key, p.value, p.role) for p in error.props]
-    assert roles == [
-        ("a", "1", "id"),
-        ("b", "2", "path"),
-        ("c", "3", "data"),
-        ("d", "4", "cmd"),
-        ("e", "5", "misc"),
-    ]
+    assert error._props == {
+        "a": "[id]1[/id]",
+        "b": "[path]2[/path]",
+        "c": "[data]3[/data]",
+        "d": "[cmd]4[/cmd]",
+        "e": "[misc]5[/misc]",
+    }
 
 
-def test_prop_is_role_less(error: CliError) -> None:
+def test_plain_prop_stores_arg_free_template_verbatim(error: CliError) -> None:
     error.prop("k", "v")
-    assert error.props[0].key == "k"
-    assert error.props[0].value == "v"
-    assert error.props[0].role is None
+    assert error._props == {"k": "v"}
+
+
+def test_plain_prop_template_markup_is_preserved_verbatim(error: CliError) -> None:
+    error.prop("k", "see [id]main[/id]")
+    assert error._props["k"] == "see [id]main[/id]"
+
+
+def test_plain_prop_args_are_escaped_and_template_markup_preserved(
+    error: CliError,
+) -> None:
+    error.prop("k", "see [id]{ref}[/id]", ref="a[b]c")
+    assert error._props["k"] == f"see [id]{escape('a[b]c')}[/id]"
+
+
+def test_plain_prop_missing_placeholder_raises(error: CliError) -> None:
+    with pytest.raises(KeyError):
+        error.prop("k", "need [id]{name}[/id]", other="x")
 
 
 def test_props_preserve_insertion_order(error: CliError) -> None:
     error.prop("first", "1").prop_id("second", "2").prop("third", "3")
-    assert [p.key for p in error.props] == ["first", "second", "third"]
+    assert list(error._props) == ["first", "second", "third"]
 
 
-def test_duplicate_keys_are_kept(error: CliError) -> None:
+def test_duplicate_keys_last_wins(error: CliError) -> None:
     error.prop("k", "one").prop("k", "two")
-    assert [(p.key, p.value) for p in error.props] == [("k", "one"), ("k", "two")]
+    assert error._props == {"k": "two"}
 
 
-@pytest.mark.parametrize("method", PROP_METHODS)
-def test_prop_value_is_escaped_at_store_time(method: str, error: CliError) -> None:
+@pytest.mark.parametrize("method, tag", list(PROP_HELPERS.items()))
+def test_prop_helper_escapes_value_inside_role_markup(
+    method: str, tag: str, error: CliError
+) -> None:
     getattr(error, method)("k", "a[b]c")
-    assert error.props[0].value == escape("a[b]c")
+    assert error._props["k"] == f"[{tag}]{escape('a[b]c')}[/{tag}]"
+
+
+def test_plain_prop_value_is_stored_verbatim_not_escaped(error: CliError) -> None:
+    error.prop("k", "a[b]c")
+    assert error._props["k"] == "a[b]c"
 
 
 @pytest.mark.parametrize("method", PROP_METHODS)
 def test_prop_key_is_stored_verbatim(method: str, error: CliError) -> None:
     getattr(error, method)("a[b]", "v")
-    assert error.props[0].key == "a[b]"
+    assert "a[b]" in error._props
 
 
 def test_prop_value_is_stringified(error: CliError) -> None:
     error.prop_data("count", 42)
-    assert error.props[0].value == "42"
+    assert error._props["count"] == "[data]42[/data]"
 
 
 class _Markup:
@@ -166,45 +194,45 @@ class _Markup:
 def test_prop_data_non_str_value_is_stringified_then_escaped(error: CliError) -> None:
     value = _Markup()
     error.prop_data("k", value)
-    assert error.props[0].value == escape(str(value))
+    assert error._props["k"] == f"[data]{escape(str(value))}[/data]"
 
 
 def test_detail_is_escaped_at_store(error: CliError) -> None:
     error.detail("a[b]c")
-    assert error.detail_text == escape("a[b]c")
+    assert error._detail_text == escape("a[b]c")
 
 
 def test_detail_last_wins(error: CliError) -> None:
     error.detail("first").detail("a[b]c")
-    assert error.detail_text == escape("a[b]c")
+    assert error._detail_text == escape("a[b]c")
 
 
 def test_hint_is_stored_verbatim(error: CliError) -> None:
     error.hint("see [id]main[/id]")
-    assert error.hint_text == "see [id]main[/id]"
+    assert error._hint_text == "see [id]main[/id]"
 
 
 def test_hint_no_arg_construction_keeps_braces_verbatim(error: CliError) -> None:
     error.hint("use {ref} syntax")
-    assert error.hint_text == "use {ref} syntax"
+    assert error._hint_text == "use {ref} syntax"
 
 
 def test_hint_last_wins(error: CliError) -> None:
     error.hint("first").hint("second")
-    assert error.hint_text == "second"
+    assert error._hint_text == "second"
 
 
 def test_hint_args_are_escaped_and_template_markup_preserved(error: CliError) -> None:
     error.hint("see [id]{commit}[/id]", commit="a[b]c")
-    assert error.hint_text is not None
-    assert escape("a[b]c") in error.hint_text
-    assert "[id]" in error.hint_text
-    assert "[/id]" in error.hint_text
+    assert error._hint_text is not None
+    assert escape("a[b]c") in error._hint_text
+    assert "[id]" in error._hint_text
+    assert "[/id]" in error._hint_text
 
 
 def test_hint_last_wins_with_args(error: CliError) -> None:
     error.hint("first {x}", x="1").hint("second {y}", y="2")
-    assert error.hint_text == "second 2"
+    assert error._hint_text == "second 2"
 
 
 def test_hint_missing_placeholder_raises(error: CliError) -> None:
@@ -215,20 +243,20 @@ def test_hint_missing_placeholder_raises(error: CliError) -> None:
 def test_arbitrary_chaining_order_works(error: CliError) -> None:
     result = error.hint("h").prop_id("k", "v").detail("d").prop("x", "y")
     assert result is error
-    assert error.hint_text == "h"
-    assert [p.key for p in error.props] == ["k", "x"]
-    assert error.detail_text == "d"
+    assert error._hint_text == "h"
+    assert list(error._props) == ["k", "x"]
+    assert error._detail_text == "d"
 
 
 def test_building_does_not_alter_message_or_str() -> None:
     error = CliError("in [id]{commit}[/id]", commit="a[b]c")
-    original_message = error.message
+    original_message = error._message
     error.prop_id("k", "v").hint("h").detail("d")
-    assert error.message == original_message
+    assert error._message == original_message
     assert str(error) == "in a[b]c"
 
 
 def test_fresh_error_has_empty_containers(error: CliError) -> None:
-    assert error.props == []
-    assert error.detail_text is None
-    assert error.hint_text is None
+    assert error._props == {}
+    assert error._detail_text is None
+    assert error._hint_text is None

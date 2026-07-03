@@ -1,68 +1,49 @@
-from typing import Any, Literal, NamedTuple, Self, TypeAlias
+from typing import Any, Self
 
 from rich.markup import escape
 from rich.text import Text
-
-Role: TypeAlias = Literal["id", "path", "data", "cmd", "misc"]
-
-
-class Prop(NamedTuple):
-    key: str
-    value: str
-    role: Role | None
 
 
 class CliError(Exception):
     """An application error carrying a Rich-markup message."""
 
     def __init__(self, template: str, **args: Any) -> None:
-        self.message = _resolve_template(template, args)
-        super().__init__(self.message)
+        self._message = _resolve_template(template, args)
+        super().__init__(self._message)
 
-        # TODO: TBD: props ordering could be an issue
-        #       should we trust a user to that each prop will be in the same
-        #       order everywheere? sshould we blame duplicates?
-        self.props: list[Prop] = []
-        self.detail_text: str | None = None
-        self.hint_text: str | None = None
+        self._props: dict[str, str] = {}  # key: prop-name, value: rich text
+        self._detail_text: str | None = None
+        self._hint_text: str | None = None
 
     def hint(self, template: str, **args: Any) -> Self:
-        self.hint_text = _resolve_template(template, args)
+        self._hint_text = _resolve_template(template, args)
         return self
 
     def detail(self, text: str) -> Self:
-        self.detail_text = escape(text)
+        self._detail_text = escape(text)
         return self
 
-    def prop(self, key: str, value: Any) -> Self:
-        return self._add_prop(key, value, None)
+    def prop(self, key: str, template: str, **args: Any) -> Self:
+        self._props[key] = _resolve_template(template, args)
+        return self
 
     def prop_id(self, key: str, value: Any) -> Self:
-        return self._add_prop(key, value, "id")
+        return self.prop(key, "[id]{value}[/id]", value=value)
 
     def prop_path(self, key: str, value: Any) -> Self:
-        return self._add_prop(key, value, "path")
+        return self.prop(key, "[path]{value}[/path]", value=value)
 
     def prop_data(self, key: str, value: Any) -> Self:
-        return self._add_prop(key, value, "data")
+        return self.prop(key, "[data]{value}[/data]", value=value)
 
     def prop_cmd(self, key: str, value: Any) -> Self:
-        return self._add_prop(key, value, "cmd")
+        return self.prop(key, "[cmd]{value}[/cmd]", value=value)
 
     def prop_misc(self, key: str, value: Any) -> Self:
-        return self._add_prop(key, value, "misc")
+        return self.prop(key, "[misc]{value}[/misc]", value=value)
 
     def __str__(self) -> str:
-        return _markup_to_str(self.message)
-
-    def _add_prop(
-        self,
-        key: str,
-        value: Any,
-        role: Role | None,
-    ) -> Self:
-        self.props.append(Prop(key, escape(str(value)), role))
-        return self
+        return _markup_to_str(self._message)
 
 
 class CliExit(Exception):

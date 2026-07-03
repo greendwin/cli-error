@@ -29,11 +29,19 @@ must not be able to break or inject terminal markup.
   `str.format` mode with each value `escape(str(value))`-substituted. Values
   interpolated inline (not passed as args) are the caller's responsibility to
   escape.
-- **Fluent, typed builder for context.** Context is attached via chained,
-  per-role methods (`prop_id`, `prop_path`, `prop_data`, `prop_cmd`,
-  `prop_misc`), a role-less `prop`, a `hint`, and a keyless `detail` block. Each
-  method escapes its value and applies the role style at the render seam, so
-  raise sites carry no manual escaping or styling.
+- **Fluent, typed builder for context.** Context is attached via chained
+  methods: a markup-first `prop`, per-role helpers (`prop_id`, `prop_path`,
+  `prop_data`, `prop_cmd`, `prop_misc`), a `hint`, and a keyless `detail` block.
+  `prop(key, template, **args)` is the primary method and follows the same
+  format-template + escaped-args rule as the message and `hint` (template is
+  trusted developer markup; args are `escape(str(value))`-substituted; arg-free
+  templates are stored verbatim). The per-role helpers are thin wrappers that
+  wrap the value in their role's markup and pass it as an escaped arg
+  (e.g. `prop_id(key, value)` ≈ `prop(key, "[id]{value}[/id]", value=value)`),
+  keeping untrusted values safe by default. Prop values are resolved into
+  role-wrapped markup immediately at construction rather than deferred to the
+  render seam, so a prop is stored as `(key, resolved_markup)` with no separate
+  role field.
 
 ## Considered options
 
@@ -56,3 +64,9 @@ must not be able to break or inject terminal markup.
   `s01t01` decision that "`CliExit` is just an exception storing a plain
   (markup-capable) message." `CliExit` now accepts the same `(template, **args)`
   contract as `CliError`, with untrusted args escaped by the shared helper.
+- Making `prop` markup-first supersedes the earlier "each method escapes its
+  value and applies the role style at the render seam" wording. Roles are no
+  longer carried as a deferred mechanism: props resolve to role-wrapped markup at
+  construction, so there is no `role` field to interpret at render time and the
+  render seam consumes ready-to-print markup. A later `prop` call for the same
+  key overwrites the earlier one (last-wins).
