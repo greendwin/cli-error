@@ -58,7 +58,7 @@ must not be able to break or inject terminal markup.
 - Migrating a consumer means dropping the `fmt_*` wrapping at each raise site and
   moving untrusted values into template args or typed `prop_*` calls — a
   mechanical simplification.
-- One place (`ErrorReporter`) owns the render layout, so formatting stays uniform
+- One place (`CliReporter`) owns the render layout, so formatting stays uniform
   across every tool that adopts the library.
 - Extending the format-template + escaped-args model to `CliExit` supersedes the
   `s01t01` decision that "`CliExit` is just an exception storing a plain
