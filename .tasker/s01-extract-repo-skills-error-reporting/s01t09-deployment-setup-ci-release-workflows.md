@@ -1,7 +1,7 @@
 ---
 id: s01t09
 slug: deployment-setup-ci-release-workflows
-status: pending
+status: done
 ---
 
 # Deployment setup (CI + release workflows)
