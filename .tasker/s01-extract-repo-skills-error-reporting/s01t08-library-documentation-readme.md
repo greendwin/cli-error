@@ -1,7 +1,7 @@
 ---
 id: s01t08
 slug: library-documentation-readme
-status: pending
+status: done
 ---
 
 # Library documentation (README)
