@@ -14,11 +14,11 @@ from ._render import (
 class CliError(Exception):
     """An application error carrying a Rich-markup message."""
 
-    def __init__(self, template: str, **args: Any) -> None:
+    def __init__(self, template: str, /, **args: Any) -> None:
         self.desc = ErrorDesc(render_template(template, **args))
         super().__init__(self.desc.message)
 
-    def hint(self, template: str, **args: Any) -> Self:
+    def hint(self, template: str, /, **args: Any) -> Self:
         self.desc.hint = render_template(template, **args)
         return self
 
@@ -26,7 +26,7 @@ class CliError(Exception):
         self.desc.detail = render_template("[misc]{detail}[/misc]", detail=text)
         return self
 
-    def prop(self, key: str, template: str, **args: Any) -> Self:
+    def prop(self, key: str, template: str, /, **args: Any) -> Self:
         self.desc.props[key] = render_template(template, **args)
         return self
 
@@ -52,7 +52,7 @@ class CliError(Exception):
 class CliExit(Exception):
     """A clean-exit signal carrying a message."""
 
-    def __init__(self, template: str, **args: Any) -> None:
+    def __init__(self, template: str, /, **args: Any) -> None:
         self.message = render_template(template, **args)
         super().__init__(self.message)
 
