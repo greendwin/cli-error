@@ -3,8 +3,8 @@
 __all__ = [
     "CliError",
     "CliExit",
+    "CliReporter",
     "DEFAULT_STYLES",
-    "ErrorReporter",
     "escape",
     "make_console",
     "make_theme",
@@ -18,4 +18,4 @@ from rich.markup import escape
 from ._console import DEFAULT_STYLES, make_console, make_theme
 from ._errors import CliError, CliExit, print_error
 from ._render import render_error, render_template
-from ._reporter import ErrorReporter
+from ._reporter import CliReporter

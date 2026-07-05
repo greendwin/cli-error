@@ -1,7 +1,7 @@
 ---
 id: s01t18
 slug: add-debug-gated-diagnostic-helpers
-status: pending
+status: done
 ---
 
 # Rename ErrorReporter to CliReporter and grow it into the CLI output façade

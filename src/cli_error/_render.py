@@ -30,7 +30,7 @@ def render_error(desc: ErrorDesc) -> str:
     return "\n".join(r)
 
 
-def render_template(template: str, **args: Any) -> str:
+def render_template(template: str, /, **args: Any) -> str:
     if not args:
         return template
 
