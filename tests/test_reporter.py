@@ -17,6 +17,51 @@ def make_color_console() -> Console:
     )
 
 
+def _inner_raise() -> None:
+    raise ValueError("boom")
+
+
+def _raise_boom() -> None:
+    _inner_raise()
+
+
+def record_show_locals(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    instance_flag: bool,
+    via_handler: bool,
+    call_arg: bool | None = None,
+) -> list[bool | None]:
+    """Capture the ``show_locals`` value each ``print_exception`` receives.
+
+    Rich only emits a per-frame locals section when it can read the frame's
+    source file, so asserting on rendered output length is fragile across
+    environments (the locals are silently dropped where the source is
+    unavailable). These cases exercise the flag-resolution logic instead, so we
+    spy on the value handed to rich rather than on what rich renders from it.
+    """
+    console_err = make_color_console()
+    reporter = CliReporter(
+        make_console(), debug=True, show_locals=instance_flag, console_err=console_err
+    )
+    recorded: list[bool | None] = []
+
+    def spy(*, show_locals: bool | None = None, **_: object) -> None:
+        recorded.append(show_locals)
+
+    monkeypatch.setattr(console_err, "print_exception", spy)
+    if via_handler:
+        with pytest.raises(SystemExit):
+            with reporter.handler():
+                _raise_boom()
+    else:
+        try:
+            _raise_boom()
+        except ValueError:
+            reporter.debug_traceback(show_locals=call_arg)
+    return recorded
+
+
 @pytest.fixture
 def console() -> Console:
     return make_console()
@@ -353,3 +398,51 @@ def test_debug_traceback_noops_outside_except_block(
 ) -> None:
     debug_reporter.debug_traceback()
     assert capsys.readouterr().err == ""
+
+
+@pytest.mark.parametrize(
+    ("instance_flag", "expected"),
+    [
+        (False, False),
+        (True, True),
+    ],
+)
+def test_show_locals_via_handler(
+    monkeypatch: pytest.MonkeyPatch, instance_flag: bool, expected: bool
+) -> None:
+    recorded = record_show_locals(
+        monkeypatch, instance_flag=instance_flag, via_handler=True
+    )
+    assert recorded == [expected]
+
+
+@pytest.mark.parametrize(
+    ("instance_flag", "call_arg", "expected"),
+    [
+        (False, True, True),
+        (True, False, False),
+        (True, None, True),
+        (False, None, False),
+    ],
+)
+def test_debug_traceback_show_locals_resolution(
+    monkeypatch: pytest.MonkeyPatch,
+    instance_flag: bool,
+    call_arg: bool | None,
+    expected: bool,
+) -> None:
+    recorded = record_show_locals(
+        monkeypatch, instance_flag=instance_flag, via_handler=False, call_arg=call_arg
+    )
+    assert recorded == [expected]
+
+
+def test_debug_traceback_show_locals_short_circuits_when_not_debug() -> None:
+    console_err = make_color_console()
+    reporter = CliReporter(make_console(), console_err=console_err)
+    with console_err.capture() as capture:
+        try:
+            _raise_boom()
+        except ValueError:
+            reporter.debug_traceback(show_locals=True)
+    assert capture.get() == ""

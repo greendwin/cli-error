@@ -15,16 +15,16 @@ from ._render import render_template
 class CliReporter:
     """Single integration point for a CLI's terminal output."""
 
-    debug: bool = False
-
     def __init__(
         self,
         console: Console,
         *,
         debug: bool = False,
+        show_locals: bool = False,
         console_err: Console | None = None,
     ) -> None:
         self.debug = debug
+        self.show_locals = show_locals
         self.console = console
         self.console_err = console_err or make_console(stderr=True)
 
@@ -41,11 +41,19 @@ class CliReporter:
         if self.debug:
             _emit(self.console_err, template, end, **args)
 
-    def debug_traceback(self) -> None:
+    def debug_traceback(self, *, show_locals: bool | None = None) -> None:
         """Emit the currently-handled traceback to the stderr console.
 
         No-op unless ``debug`` is set. Safely no-ops outside an ``except``
         block: ``print_exception`` reads ``sys.exc_info()``.
+
+        ``show_locals`` overrides the instance default per call; when left as
+        ``None`` the traceback defers to the ``show_locals`` flag the reporter
+        was constructed with.
+
+        Caution: ``show_locals`` renders every frame's local variables verbatim
+        to stderr, which may expose secrets (tokens, passwords). Keep it gated
+        behind an explicit developer-only flag.
         """
         if not self.debug:
             return
@@ -53,7 +61,11 @@ class CliReporter:
         if sys.exc_info()[0] is None:
             return
 
-        self.console_err.print_exception()
+        effective = show_locals
+        if effective is None:
+            effective = self.show_locals
+
+        self.console_err.print_exception(show_locals=effective)
 
     def debug_cmd(self, cmd: list[str], cwd: Path | None = None) -> None:
         """Emit a subprocess command (and optional cwd) as a debug diagnostic."""

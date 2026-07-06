@@ -1,7 +1,7 @@
 ---
 id: s01t16
 slug: optionally-show-locals-in-debug
-status: pending
+status: done
 ---
 
 # Add opt-in show_locals to the debug traceback

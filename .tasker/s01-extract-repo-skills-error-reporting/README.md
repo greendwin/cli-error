@@ -54,7 +54,7 @@ status: pending
 - [x] [s01t13](s01t13-store-detail-as-ready-to.md): Store detail as ready-to-print [misc] markup (restore render-seam invariant)
 - [x] [s01t14](s01t14-handle-empty-message-cause-in.md): Handle empty-message cause in cause-chain rendering
 - [ ] [s01t15](s01t15-reconsider-derive-debug-stderr-console.md): Debug stderr console inherits user intent (no_color + theme), not per-stream geometry
-- [ ] [s01t16](s01t16-optionally-show-locals-in-debug.md): Add opt-in show_locals to the debug traceback
+- [x] [s01t16](s01t16-optionally-show-locals-in-debug.md): Add opt-in show_locals to the debug traceback
 - [ ] [s01t17](s01t17-test-debug-traceback-includes-the.md): Test: debug traceback includes the exception cause chain
 - [x] [s01t18](s01t18-add-debug-gated-diagnostic-helpers.md): Rename ErrorReporter to CliReporter and grow it into the CLI output façade
 - [ ] [s01t19](s01t19-consolidate-shared-test-helpers-across.md): Consolidate shared test helpers into tests/_helpers.py
