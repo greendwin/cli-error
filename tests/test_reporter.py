@@ -23,6 +23,14 @@ def derive_console_err(console: Console) -> Console:
     return CliReporter(console, debug=True).console_err
 
 
+class _Inner(Exception):
+    pass
+
+
+class _Outer(Exception):
+    pass
+
+
 def _inner_raise() -> None:
     raise ValueError("boom")
 
@@ -495,6 +503,24 @@ def test_derived_console_err_tolerates_themeless_console() -> None:
     # ``get_style`` during derivation.
     console_err = derive_console_err(Console())
     assert console_err.get_style("misc") == Style()
+
+
+def test_debug_traceback_emits_full_cause_chain(
+    debug_reporter: CliReporter, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # A chained exception raised through ``handler()`` under debug must emit the
+    # WHOLE cause chain to stderr, not just the outermost frame. Assert on the
+    # two type names (stable) rather than Rich's traceback layout (brittle).
+    with pytest.raises(SystemExit):
+        with debug_reporter.handler():
+            try:
+                raise _Inner("inner boom")
+            except _Inner as inner:
+                raise _Outer("outer boom") from inner
+
+    err = capsys.readouterr().err
+    assert "_Outer" in err
+    assert "_Inner" in err
 
 
 def test_injected_console_err_is_used_as_is() -> None:
