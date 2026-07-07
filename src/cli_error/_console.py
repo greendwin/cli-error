@@ -38,3 +38,14 @@ def make_console(
         stderr=stderr,
         no_color=no_color,
     )
+
+
+def derive_stderr_console(console: Console) -> Console:
+    """Build a stderr console that inherits ``console``'s user intent."""
+    return make_console(
+        stderr=True,
+        no_color=console.no_color,
+        styles={
+            role: console.get_style(role, default=Style()) for role in DEFAULT_STYLES
+        },
+    )

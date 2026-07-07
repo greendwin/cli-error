@@ -7,7 +7,7 @@ from typing import Any
 
 from rich.console import Console
 
-from ._console import make_console
+from ._console import derive_stderr_console
 from ._errors import CliExit, print_error
 from ._render import render_template
 
@@ -26,7 +26,7 @@ class CliReporter:
         self.debug = debug
         self.show_locals = show_locals
         self.console = console
-        self.console_err = console_err or make_console(stderr=True)
+        self.console_err = console_err or derive_stderr_console(console)
 
     def print(self, template: str, /, *, end: str = "\n", **args: Any) -> None:
         """Render a trusted template with escaped args to the stdout console."""

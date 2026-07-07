@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from rich.console import Console
+from rich.style import Style
 
 import cli_error
 from cli_error import CliError, CliExit, CliReporter, make_console, make_theme
@@ -15,6 +16,11 @@ def make_color_console() -> Console:
         force_terminal=True,
         color_system="standard",
     )
+
+
+def derive_console_err(console: Console) -> Console:
+    """Auto-derived stderr console for a debug reporter wired to ``console``."""
+    return CliReporter(console, debug=True).console_err
 
 
 def _inner_raise() -> None:
@@ -446,3 +452,53 @@ def test_debug_traceback_show_locals_short_circuits_when_not_debug() -> None:
         except ValueError:
             reporter.debug_traceback(show_locals=True)
     assert capture.get() == ""
+
+
+@pytest.mark.parametrize("no_color", [True, False])
+def test_derived_console_err_inherits_no_color_intent(no_color: bool) -> None:
+    # With no ``console_err`` injected, the derived stderr console must carry the
+    # injected stdout console's ``no_color`` intent. The parametrized pair proves
+    # the flag is load-bearing rather than hard-coded.
+    console_err = derive_console_err(make_console(no_color=no_color))
+    assert console_err.no_color is no_color
+
+
+def test_derived_console_err_inherits_overridden_theme_role() -> None:
+    # An overridden role on the injected console must re-resolve on the derived
+    # stderr console (theme intent, not just no_color, is inherited).
+    console = make_console(styles={"misc": "yellow"})
+    console_err = derive_console_err(console)
+    assert console_err.get_style("misc") == console.get_style("misc")
+
+
+def test_derived_console_err_does_not_inherit_geometry() -> None:
+    # Width is left to Rich's per-stream detection, not copied from the injected
+    # console — an artificially narrow injected console must not constrain it.
+    console = make_console()
+    console.width = 20
+    console_err = derive_console_err(console)
+    assert console_err.width == make_console(stderr=True).width
+
+
+def test_derived_console_err_does_not_inherit_color_system() -> None:
+    # Color system is left to Rich's per-stream detection, not copied from the
+    # injected console — a forced-color injected console must not impose its
+    # ``standard`` color system on the derived stderr stream.
+    console = make_color_console()
+    console_err = derive_console_err(console)
+    assert console_err.color_system == make_console(stderr=True).color_system
+
+
+def test_derived_console_err_tolerates_themeless_console() -> None:
+    # The public constructor accepts any Rich console; a themeless one (no role
+    # styles defined) must degrade to unstyled roles rather than crash on
+    # ``get_style`` during derivation.
+    console_err = derive_console_err(Console())
+    assert console_err.get_style("misc") == Style()
+
+
+def test_injected_console_err_is_used_as_is() -> None:
+    # The explicit ``console_err`` escape hatch bypasses derivation entirely.
+    console_err = make_color_console()
+    reporter = CliReporter(make_console(no_color=True), console_err=console_err)
+    assert reporter.console_err is console_err

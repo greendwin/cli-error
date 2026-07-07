@@ -1,7 +1,7 @@
 ---
 id: s01t15
 slug: reconsider-derive-debug-stderr-console
-status: pending
+status: done
 ---
 
 # Debug stderr console inherits user intent (no_color + theme), not per-stream geometry
