@@ -1,7 +1,7 @@
 ---
 id: s01
 slug: extract-repo-skills-error-reporting
-status: pending
+status: done
 ---
 
 # Extract repo-skills error reporting into cli-error library
@@ -57,5 +57,5 @@ status: pending
 - [x] [s01t16](s01t16-optionally-show-locals-in-debug.md): Add opt-in show_locals to the debug traceback
 - [x] [s01t17](s01t17-test-debug-traceback-includes-the.md): Test: debug traceback includes the exception cause chain
 - [x] [s01t18](s01t18-add-debug-gated-diagnostic-helpers.md): Rename ErrorReporter to CliReporter and grow it into the CLI output façade
-- [ ] [s01t19](s01t19-consolidate-shared-test-helpers-across.md): Consolidate shared test helpers into tests/_helpers.py
+- [x] [s01t19](s01t19-consolidate-shared-test-helpers-across.md): Consolidate shared test helpers into tests/_helpers.py
 - [x] [s01t20](s01t20-add-a-safe-post-construction.md): Add a safe post-construction debug toggle to CliReporter

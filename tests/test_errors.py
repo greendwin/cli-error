@@ -2,6 +2,7 @@ import pytest
 from rich.console import Console
 
 from cli_error import CliError, CliExit, escape, make_console
+from tests.helpers import capture
 
 PROP_METHODS = ["prop_id", "prop_path", "prop_data", "prop_cmd", "prop_misc", "prop"]
 PROP_HELPERS = {
@@ -90,9 +91,7 @@ def test_make_console_returns_console() -> None:
     console = make_console()
     assert isinstance(console, Console)
     assert console.stderr is False
-    with console.capture() as capture:
-        console.print("[err]x[/err]")
-    assert "x" in capture.get()
+    assert "x" in capture(console, "[err]x[/err]")
 
 
 def test_make_console_stderr_variant_sets_flag_and_is_themed() -> None:

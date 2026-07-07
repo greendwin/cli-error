@@ -1,33 +1,7 @@
-from rich.console import Console
 from rich.style import Style
-from rich.theme import Theme
 
 from cli_error import DEFAULT_STYLES, make_console, make_theme
-
-_ROLES = ("id", "data", "path", "cmd", "misc", "warn", "err")
-
-
-def _forced(theme: Theme, *, no_color: bool = False) -> Console:
-    """A forced-ANSI console carrying ``theme``; ``no_color`` strips escapes."""
-    return Console(
-        theme=theme,
-        force_terminal=True,
-        color_system="standard",
-        no_color=no_color,
-        highlight=False,
-        width=80,
-    )
-
-
-def _terminal(theme_source: Console) -> Console:
-    """A forced-ANSI console carrying ``theme_source``'s resolved roles."""
-    return _forced(Theme({role: theme_source.get_style(role) for role in _ROLES}))
-
-
-def _capture(console: Console, markup: str) -> str:
-    with console.capture() as capture:
-        console.print(markup)
-    return capture.get()
+from tests.helpers import _ROLES, capture, forced_terminal, theme_from
 
 
 def test_default_console_maps_roles_to_canonical_styles() -> None:
@@ -37,8 +11,8 @@ def test_default_console_maps_roles_to_canonical_styles() -> None:
 
 
 def test_default_roles_render_as_distinct_ansi_runs() -> None:
-    console = _terminal(make_console())
-    out = _capture(console, "[id]a[/id][path]b[/path][err]c[/err]")
+    console = forced_terminal(theme_from(make_console()))
+    out = capture(console, "[id]a[/id][path]b[/path][err]c[/err]")
 
     id_run = console.get_style("id").render("a")
     path_run = console.get_style("path").render("b")
@@ -79,18 +53,18 @@ def test_unknown_role_key_is_added_and_never_raises() -> None:
     console = make_console(styles={"custom": "magenta"})
     assert console.get_style("custom") == Style.parse("magenta")
     # An undefined role degrades to plain text on a colour terminal, no error.
-    terminal = _terminal(make_console())
-    assert _capture(terminal, "[undefined]x[/undefined]") == "x\n"
+    terminal = forced_terminal(theme_from(make_console()))
+    assert capture(terminal, "[undefined]x[/undefined]") == "x\n"
 
 
 def test_no_color_suppresses_ansi_on_a_forced_terminal() -> None:
     # Positive control: an identical forced terminal DOES emit ANSI, proving the
     # no_color flag below is load-bearing rather than vacuously satisfied.
-    coloured = _forced(make_theme(), no_color=False)
-    plain = _forced(make_theme(), no_color=True)
+    coloured = forced_terminal(make_theme(), no_color=False)
+    plain = forced_terminal(make_theme(), no_color=True)
 
-    coloured_out = _capture(coloured, "[id]x[/id]")
-    plain_out = _capture(plain, "[id]x[/id]")
+    coloured_out = capture(coloured, "[id]x[/id]")
+    plain_out = capture(plain, "[id]x[/id]")
 
     assert "\x1b" in coloured_out
     assert "\x1b" not in plain_out
@@ -99,7 +73,7 @@ def test_no_color_suppresses_ansi_on_a_forced_terminal() -> None:
 
 def test_no_color_console_exposes_flag_and_renders_plain_text() -> None:
     console = make_console(no_color=True)
-    out = _capture(console, "[id]x[/id]")
+    out = capture(console, "[id]x[/id]")
 
     assert out == "x\n"
     assert "\x1b" not in out
@@ -125,8 +99,8 @@ def test_default_styles_is_public_and_has_the_seven_roles() -> None:
 
 
 def test_make_theme_is_attachable_to_a_plain_console() -> None:
-    console = _forced(make_theme())
-    out = _capture(console, "[id]x[/id]")
+    console = forced_terminal(make_theme())
+    out = capture(console, "[id]x[/id]")
     assert console.get_style("id").render("x") in out
 
 
@@ -141,4 +115,4 @@ def test_override_value_may_be_a_prebuilt_style_object() -> None:
     console = make_console(styles={"id": override})
 
     assert console.get_style("id") == override
-    assert _capture(console, "[id]x[/id]") == "x\n"
+    assert capture(console, "[id]x[/id]") == "x\n"

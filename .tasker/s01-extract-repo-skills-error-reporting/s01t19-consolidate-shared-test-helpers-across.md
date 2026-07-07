@@ -1,7 +1,7 @@
 ---
 id: s01t19
 slug: consolidate-shared-test-helpers-across
-status: pending
+status: done
 ---
 
 # Consolidate shared test helpers into tests/_helpers.py

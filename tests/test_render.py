@@ -1,14 +1,10 @@
-from rich.console import Console
-from rich.theme import Theme
-
 from cli_error import CliError, make_console, print_error, render_error
+from tests.helpers import capture_emit, forced_terminal, theme_from
 
 
 def _render(ex: Exception) -> str:
     console = make_console()
-    with console.capture() as capture:
-        print_error(ex, console)
-    return capture.get()
+    return capture_emit(console, lambda c: print_error(ex, c))
 
 
 def test_full_layout_renders_in_documented_order() -> None:
@@ -73,20 +69,9 @@ def test_no_props_detail_or_hint_emits_only_message() -> None:
 
 def test_role_markup_is_applied_to_values_on_a_terminal() -> None:
     palette = make_console()
-    theme = Theme(
-        {role: palette.get_style(role) for role in ("id", "path", "misc", "err")}
-    )
-    console = Console(
-        theme=theme,
-        force_terminal=True,
-        color_system="standard",
-        highlight=False,
-        width=80,
-    )
+    console = forced_terminal(theme_from(palette, roles=("id", "path", "misc", "err")))
     error = CliError("m").prop_id("who", "abc").prop_path("where", "/p").detail("dee")
-    with console.capture() as capture:
-        print_error(error, console)
-    out = capture.get()
+    out = capture_emit(console, lambda c: print_error(error, c))
 
     id_run = console.get_style("id").render("abc")
     path_run = console.get_style("path").render("/p")
