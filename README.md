@@ -198,10 +198,12 @@ if __name__ == "__main__":
     main()
 ```
 
-`CliReporter(console, *, debug=False, console_err=None)` — when `console_err` is
-omitted a stderr console is built for you. Wire `--debug` at construction as
-above; the flag is also a plain public attribute you can toggle later
-(`reporter.debug = True`).
+`CliReporter(console, *, debug=False, show_locals=False, console_err=None)` — when
+`console_err` is omitted a stderr console is built for you, inheriting the passed
+console's `no_color` and theme so debug output matches your main console. Wire
+`--debug` at construction as above; the flag is also a plain public attribute you
+can toggle later (`reporter.debug = True`). `show_locals` sets the default for
+`debug_traceback` (see below).
 
 ### Cause chains
 
@@ -233,7 +235,7 @@ Because they self-gate, you can sprinkle them freely without guarding each call.
 | Method                         | Emits (only when `debug`)                          |
 | ------------------------------ | -------------------------------------------------- |
 | `debug_print(template, **args)`| a trusted template with escaped args               |
-| `debug_traceback()`            | the currently-handled exception traceback          |
+| `debug_traceback(show_locals=None)` | the currently-handled exception traceback     |
 | `debug_cmd(cmd, cwd=None)`     | a subprocess command line and optional working dir |
 | `debug_output(stdout, stderr)` | captured subprocess output (empty streams skipped) |
 
@@ -250,7 +252,10 @@ reporter.debug_output(result.stdout, result.stderr)
 
 `debug_traceback()` is what `handler()` calls for you on an uncaught exception,
 so a `--debug` run automatically shows the full traceback on stderr alongside
-the rendered error.
+the rendered error. Pass `show_locals=True` (per call, or as the
+`CliReporter(show_locals=True)` default) to include each frame's local variables
+— useful when debugging, but keep it developer-only since locals can expose
+secrets like tokens or passwords.
 
 ## Customizing the theme
 
@@ -285,3 +290,16 @@ The repository is checked with `tox` (typecheck, test, lint):
 ```bash
 uv run tox
 ```
+
+## Release Notes
+
+### v0.1.1
+- `debug_traceback` can now render per-frame locals — opt in with `CliReporter(show_locals=True)` or a per-call `debug_traceback(show_locals=True)` override (locals may expose secrets, so keep it developer-only).
+- The auto-built stderr console now inherits the injected console's `no_color` and theme intent, so debug output matches your main console's styling.
+
+### v0.1.0
+- `CliError` — structured exceptions with Rich-markup messages and a fluent builder for hints, detail blocks, and labelled context properties.
+- `CliReporter` — output/exit façade: a context manager that maps exceptions to exit codes, renders the `caused by:` cause chain, and gates debug diagnostics behind a `debug` flag.
+- `CliExit` — a clean-exit signal that prints its message and exits with status 0.
+- Theming via `make_console`, `make_theme`, and `DEFAULT_STYLES` — Rich consoles with default style roles, per-role overrides, `no_color` degradation, and stderr routing.
+- Automatic escaping of untrusted template/property values, plus standalone `render_error`, `render_template`, and `print_error` helpers.
