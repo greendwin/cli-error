@@ -89,6 +89,11 @@ class CliReporter:
         if trimmed:
             self.debug_print("[misc]STDERR:\n{text}[/misc]", text=trimmed)
 
+    def report_error(self, ex: Exception) -> None:
+        """Render an error (debug traceback + message + cause chain), no exit."""
+        self.debug_traceback()
+        print_error(ex, self.console)
+
     @contextmanager
     def handler(self) -> Generator[None, None, None]:
         """Report errors and translate them into process exit codes."""
@@ -98,8 +103,7 @@ class CliReporter:
             self.print(ex.message)
             raise SystemExit(0) from None
         except Exception as ex:
-            self.debug_traceback()
-            print_error(ex, self.console)
+            self.report_error(ex)
             raise SystemExit(1) from None
 
 

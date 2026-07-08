@@ -114,6 +114,26 @@ def run_handler(
     return code, capture.get().strip(), capsys.readouterr().err
 
 
+def run_report_error(
+    console: Console,
+    reporter: CliReporter,
+    error: Exception,
+    capsys: pytest.CaptureFixture[str],
+) -> tuple[str, str]:
+    """Drive ``report_error`` from within a live ``except`` block.
+
+    Raising ``error`` inside the helper's own ``except`` populates
+    ``sys.exc_info()``, so both the debug live-traceback path and the plain
+    stdout render are exercised. Returns ``(stdout, stderr)``.
+    """
+    with console.capture() as capture:
+        try:
+            raise error
+        except Exception as ex:
+            reporter.report_error(ex)
+    return capture.get(), capsys.readouterr().err
+
+
 @pytest.mark.parametrize(
     ("error", "expected_code", "expected_output"),
     [
@@ -527,6 +547,17 @@ def test_derived_console_err_tolerates_themeless_console() -> None:
     assert console_err.get_style("misc") == Style()
 
 
+def _chained_error() -> _Outer:
+    """Build an ``_Outer`` whose ``__cause__`` is an ``_Inner`` (a real chain)."""
+    try:
+        try:
+            raise _Inner("inner boom")
+        except _Inner as inner:
+            raise _Outer("outer boom") from inner
+    except _Outer as outer:
+        return outer
+
+
 def test_debug_traceback_emits_full_cause_chain(
     debug_reporter: CliReporter, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -535,14 +566,80 @@ def test_debug_traceback_emits_full_cause_chain(
     # two type names (stable) rather than Rich's traceback layout (brittle).
     with pytest.raises(SystemExit):
         with debug_reporter.handler():
-            try:
-                raise _Inner("inner boom")
-            except _Inner as inner:
-                raise _Outer("outer boom") from inner
+            raise _chained_error()
 
     err = capsys.readouterr().err
     assert "_Outer" in err
     assert "_Inner" in err
+
+
+def test_report_error_renders_error_and_cause_chain_to_stdout(
+    console: Console, reporter: CliReporter, capsys: pytest.CaptureFixture[str]
+) -> None:
+    output, _ = run_report_error(console, reporter, _chained_error(), capsys)
+    assert "Error: outer boom" in output
+    assert "caused by: inner boom" in output
+
+
+def test_report_error_renders_rich_error_hint_and_prop_to_stdout(
+    console: Console, reporter: CliReporter, capsys: pytest.CaptureFixture[str]
+) -> None:
+    error = CliError("boom").hint("try X").prop_id("id", "42")
+    output, _ = run_report_error(console, reporter, error, capsys)
+    assert "try X" in output
+    assert "id" in output
+    assert "42" in output
+
+
+def test_report_error_in_a_loop_returns_normally(
+    console: Console, reporter: CliReporter, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # The non-fatal mirror of ``handler()`` must return normally so a caller can
+    # keep looping. Two calls in sequence each render an error and neither exits;
+    # reaching the asserts proves no ``SystemExit`` escaped.
+    first, _ = run_report_error(console, reporter, ValueError("boom one"), capsys)
+    second, _ = run_report_error(console, reporter, ValueError("boom two"), capsys)
+    assert "Error: boom one" in first
+    assert "Error: boom two" in second
+
+
+@pytest.mark.parametrize(
+    ("reporter_name", "traceback_expected"),
+    [
+        ("reporter", False),
+        ("debug_reporter", True),
+    ],
+)
+def test_report_error_traceback_on_stderr_is_debug_gated(
+    request: pytest.FixtureRequest,
+    console: Console,
+    reporter_name: str,
+    traceback_expected: bool,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    # The error always renders to stdout; the traceback reaches stderr only when
+    # ``debug`` is set -- the shared stream/gating invariant, made explicit.
+    reporter = request.getfixturevalue(reporter_name)
+    output, err = run_report_error(console, reporter, ValueError("boom"), capsys)
+    assert "Error: boom" in output
+    if traceback_expected:
+        assert "Traceback" in err
+        assert "ValueError" in err
+    else:
+        assert err == ""
+
+
+def test_report_error_outside_except_block_does_not_raise(
+    console: Console, debug_reporter: CliReporter, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # Called outside an ``except`` there is no ``sys.exc_info``, so even a debug
+    # reporter emits no traceback; the error message still renders and no
+    # exception escapes. This no-active-exception path cannot go through
+    # ``run_report_error`` (which always raises inside its own ``except``).
+    with console.capture() as capture:
+        debug_reporter.report_error(ValueError("boom"))
+    assert "Error: boom" in capture.get()
+    assert capsys.readouterr().err == ""
 
 
 def test_injected_console_err_is_used_as_is() -> None:
