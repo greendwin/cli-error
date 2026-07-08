@@ -293,6 +293,9 @@ uv run tox
 
 ## Release Notes
 
+### v0.1.2
+- Debug diagnostics now share a consistent uppercase `LABEL:` grammar — `debug_cmd` emits flush-left `RUN:`/`CWD:` lines, and `debug_output` couples a single `STDOUT:`/`STDERR:` header to its output block.
+
 ### v0.1.1
 - `debug_traceback` can now render per-frame locals — opt in with `CliReporter(show_locals=True)` or a per-call `debug_traceback(show_locals=True)` override (locals may expose secrets, so keep it developer-only).
 - The auto-built stderr console now inherits the injected console's `no_color` and theme intent, so debug output matches your main console's styling.
