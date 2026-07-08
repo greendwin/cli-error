@@ -72,39 +72,26 @@ class CliReporter:
         if not self.debug:
             return
 
-        self.debug_print("[misc]COMMAND: {cmd}[/misc]", cmd=shlex.join(cmd))
+        self.debug_print("[misc]RUN: {cmd}[/misc]", cmd=shlex.join(cmd))
         if cwd is not None:
-            self.debug_print("[misc]  cwd: {cwd}[/misc]", cwd=cwd)
+            self.debug_print("[misc]CWD: {cwd}[/misc]", cwd=cwd)
 
     def debug_output(self, stdout: str, stderr: str) -> None:
-        """Emit captured subprocess output as debug diagnostics.
-
-        Each non-empty stream is emitted as a header line followed by the
-        captured text as one escaped ``misc`` block; empty streams are skipped.
-        """
+        """Emit captured subprocess output as debug diagnostics."""
         if not self.debug:
             return
 
-        for label, text in (("stdout", stdout), ("stderr", stderr)):
-            trimmed = text.rstrip()
-            if not trimmed:
-                continue
+        trimmed = stdout.rstrip()
+        if trimmed:
+            self.debug_print("[misc]STDOUT:\n{text}[/misc]", text=trimmed)
 
-            # TODO: this layout is ugly, lets prepend each line 'stdout: ' prefix
-            self.debug_print("[misc]  {label}:[/misc]", label=label)
-            self.debug_print("[misc]{text}[/misc]", text=trimmed)
+        trimmed = stderr.rstrip()
+        if trimmed:
+            self.debug_print("[misc]STDERR:\n{text}[/misc]", text=trimmed)
 
     @contextmanager
     def handler(self) -> Generator[None]:
-        """Report errors and translate them into process exit codes.
-
-        * ``CliExit`` prints its message and exits 0;
-        * any other ``Exception`` is rendered via ``print_error`` and exits 1,
-          additionally emitting a full traceback to the ``stderr`` console when
-          ``debug`` is set.
-        * ``KeyboardInterrupt``, ``SystemExit`` and any other ``BaseException``
-        propagate untouched.
-        """
+        """Report errors and translate them into process exit codes."""
         try:
             yield
         except CliExit as ex:

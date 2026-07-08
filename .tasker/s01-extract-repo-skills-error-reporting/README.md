@@ -59,3 +59,5 @@ status: done
 - [x] [s01t18](s01t18-add-debug-gated-diagnostic-helpers.md): Rename ErrorReporter to CliReporter and grow it into the CLI output façade
 - [x] [s01t19](s01t19-consolidate-shared-test-helpers-across.md): Consolidate shared test helpers into tests/_helpers.py
 - [x] [s01t20](s01t20-add-a-safe-post-construction.md): Add a safe post-construction debug toggle to CliReporter
+- [x] [s01t21](s01t21-reconsider-debug-output-layout-evaluate.md): Reconsider debug_output layout — rule/divider delimiters
+- [x] [s01t22](s01t22-unify-debug-helper-label-idiom.md): Unify debug-helper label idiom (debug_cmd vs debug_output)

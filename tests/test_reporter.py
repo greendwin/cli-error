@@ -299,8 +299,8 @@ def test_debug_cmd_emits_command_and_cwd(
 ) -> None:
     debug_reporter.debug_cmd(["git", "commit", "-m", "a b"], cwd=Path("/tmp/x"))
     err = capsys.readouterr().err
-    assert "COMMAND: git commit -m 'a b'" in err
-    assert "cwd: /tmp/x" in err
+    assert "RUN: git commit -m 'a b'" in err
+    assert "CWD: /tmp/x" in err
 
 
 def test_debug_cmd_omits_cwd_when_none(
@@ -308,8 +308,8 @@ def test_debug_cmd_omits_cwd_when_none(
 ) -> None:
     debug_reporter.debug_cmd(["ls"])
     err = capsys.readouterr().err
-    assert "COMMAND: ls" in err
-    assert "cwd:" not in err
+    assert "RUN: ls" in err
+    assert "CWD:" not in err
 
 
 def test_debug_cmd_silent_when_disabled(
@@ -327,15 +327,23 @@ def test_debug_cmd_escapes_markup(
     assert "[red]hi[/red]" in err
 
 
+def test_debug_cmd_escapes_markup_in_cwd(
+    debug_reporter: CliReporter, capsys: pytest.CaptureFixture[str]
+) -> None:
+    debug_reporter.debug_cmd(["ls"], cwd=Path("/tmp/[red]x[/red]"))
+    err = capsys.readouterr().err
+    assert "[red]x[/red]" in err
+
+
 def test_debug_output_emits_both_streams(
     debug_reporter: CliReporter, capsys: pytest.CaptureFixture[str]
 ) -> None:
     debug_reporter.debug_output("out1\nout2  \n", "err1")
     err = capsys.readouterr().err
-    assert "stdout:" in err
-    assert "out1\nout2" in err
-    assert "stderr:" in err
-    assert "err1" in err
+    # Pin label-on-its-own-line + the ``\n`` separator + the trailing ``rstrip``
+    # as one contiguous unit, so swapping the newline for a space would fail.
+    assert "STDOUT:\nout1\nout2" in err
+    assert "STDERR:\nerr1" in err
 
 
 def test_debug_output_skips_empty_streams(
@@ -350,9 +358,9 @@ def test_debug_output_skips_only_the_empty_stream(
 ) -> None:
     debug_reporter.debug_output("kept", "   ")
     err = capsys.readouterr().err
-    assert "stdout:" in err
+    assert "STDOUT:" in err
     assert "kept" in err
-    assert "stderr:" not in err
+    assert "STDERR:" not in err
 
 
 def test_debug_output_escapes_markup(
@@ -381,7 +389,21 @@ def test_debug_cmd_wraps_payload_in_dim_misc_style(
         reporter.debug_cmd(["ls"])
     output = capture.get()
     assert "\x1b[2m" in output
-    assert "COMMAND: ls" in output
+    assert "RUN: ls" in output
+
+
+def test_debug_output_wraps_header_in_dim_misc_style(
+    color_reporter: tuple[Console, CliReporter],
+) -> None:
+    # With color forced on, the ``misc`` role (=dim) must render its ANSI
+    # escape around the ``STDOUT:`` header, proving the ``[misc]…[/misc]``
+    # wrapper is applied rather than dropped.
+    color_console, reporter = color_reporter
+    with color_console.capture() as capture:
+        reporter.debug_output("out", "")
+    output = capture.get()
+    assert "\x1b[2m" in output
+    assert "STDOUT:" in output
 
 
 def test_debug_honors_trusted_markup_but_escapes_args(
