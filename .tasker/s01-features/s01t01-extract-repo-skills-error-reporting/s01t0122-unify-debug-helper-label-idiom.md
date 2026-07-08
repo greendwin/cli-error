@@ -1,5 +1,5 @@
 ---
-id: s01t22
+id: s01t0122
 slug: unify-debug-helper-label-idiom
 status: done
 ---

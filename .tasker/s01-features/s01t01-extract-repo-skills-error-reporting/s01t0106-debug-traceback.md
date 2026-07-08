@@ -1,5 +1,5 @@
 ---
-id: s01t06
+id: s01t0106
 slug: debug-traceback
 status: done
 ---

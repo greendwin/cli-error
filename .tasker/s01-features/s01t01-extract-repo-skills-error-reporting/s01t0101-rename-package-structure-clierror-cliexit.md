@@ -1,5 +1,5 @@
 ---
-id: s01t01
+id: s01t0101
 slug: rename-package-structure-clierror-cliexit
 status: done
 ---

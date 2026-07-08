@@ -1,5 +1,5 @@
 ---
-id: s01
+id: s01t01
 slug: extract-repo-skills-error-reporting
 status: done
 ---
@@ -39,25 +39,25 @@ status: done
 
 ## Subtasks
 
-- [x] [s01t01](s01t01-rename-package-structure-clierror-cliexit.md): Rename package, structure, CliError/CliExit types
-- [x] [s01t02](s01t02-fluent-builder-for-clierror-context.md): Fluent builder for CliError context
-- [x] [s01t03](s01t03-render-formatted-error.md): Render formatted error
-- [x] [s01t04](s01t04-error-handler-errorreporter-context-manager.md): Error handler (ErrorReporter context manager)
-- [x] [s01t05](s01t05-cause-chain-rendering.md): Cause chain rendering
-- [x] [s01t06](s01t06-debug-traceback.md): Debug traceback
-- [x] [s01t07](s01t07-console-creation-with-style-overrides.md): Console creation with style overrides
-- [x] [s01t08](s01t08-library-documentation-readme.md): Library documentation (README)
-- [x] [s01t09](s01t09-deployment-setup-ci-release-workflows.md): Deployment setup (CI + release workflows)
-- [x] [s01t10](s01t10-unify-markup-construction-template-args.md): Unify markup construction — template + args for hint and CliExit
-- [x] [s01t11](s01t11-refine-detail-single-last-wins.md): Refine detail — single last-wins str block
-- [x] [s01t12](s01t12-revisit-props-markup-first-prop.md): Revisit props: markup-first `prop` with template+args, roles as thin helpers
-- [x] [s01t13](s01t13-store-detail-as-ready-to.md): Store detail as ready-to-print [misc] markup (restore render-seam invariant)
-- [x] [s01t14](s01t14-handle-empty-message-cause-in.md): Handle empty-message cause in cause-chain rendering
-- [x] [s01t15](s01t15-reconsider-derive-debug-stderr-console.md): Debug stderr console inherits user intent (no_color + theme), not per-stream geometry
-- [x] [s01t16](s01t16-optionally-show-locals-in-debug.md): Add opt-in show_locals to the debug traceback
-- [x] [s01t17](s01t17-test-debug-traceback-includes-the.md): Test: debug traceback includes the exception cause chain
-- [x] [s01t18](s01t18-add-debug-gated-diagnostic-helpers.md): Rename ErrorReporter to CliReporter and grow it into the CLI output façade
-- [x] [s01t19](s01t19-consolidate-shared-test-helpers-across.md): Consolidate shared test helpers into tests/_helpers.py
-- [x] [s01t20](s01t20-add-a-safe-post-construction.md): Add a safe post-construction debug toggle to CliReporter
-- [x] [s01t21](s01t21-reconsider-debug-output-layout-evaluate.md): Reconsider debug_output layout — rule/divider delimiters
-- [x] [s01t22](s01t22-unify-debug-helper-label-idiom.md): Unify debug-helper label idiom (debug_cmd vs debug_output)
+- [x] [s01t0101](s01t0101-rename-package-structure-clierror-cliexit.md): Rename package, structure, CliError/CliExit types
+- [x] [s01t0102](s01t0102-fluent-builder-for-clierror-context.md): Fluent builder for CliError context
+- [x] [s01t0103](s01t0103-render-formatted-error.md): Render formatted error
+- [x] [s01t0104](s01t0104-error-handler-errorreporter-context-manager.md): Error handler (ErrorReporter context manager)
+- [x] [s01t0105](s01t0105-cause-chain-rendering.md): Cause chain rendering
+- [x] [s01t0106](s01t0106-debug-traceback.md): Debug traceback
+- [x] [s01t0107](s01t0107-console-creation-with-style-overrides.md): Console creation with style overrides
+- [x] [s01t0108](s01t0108-library-documentation-readme.md): Library documentation (README)
+- [x] [s01t0109](s01t0109-deployment-setup-ci-release-workflows.md): Deployment setup (CI + release workflows)
+- [x] [s01t0110](s01t0110-unify-markup-construction-template-args.md): Unify markup construction — template + args for hint and CliExit
+- [x] [s01t0111](s01t0111-refine-detail-single-last-wins.md): Refine detail — single last-wins str block
+- [x] [s01t0112](s01t0112-revisit-props-markup-first-prop.md): Revisit props: markup-first `prop` with template+args, roles as thin helpers
+- [x] [s01t0113](s01t0113-store-detail-as-ready-to.md): Store detail as ready-to-print [misc] markup (restore render-seam invariant)
+- [x] [s01t0114](s01t0114-handle-empty-message-cause-in.md): Handle empty-message cause in cause-chain rendering
+- [x] [s01t0115](s01t0115-reconsider-derive-debug-stderr-console.md): Debug stderr console inherits user intent (no_color + theme), not per-stream geometry
+- [x] [s01t0116](s01t0116-optionally-show-locals-in-debug.md): Add opt-in show_locals to the debug traceback
+- [x] [s01t0117](s01t0117-test-debug-traceback-includes-the.md): Test: debug traceback includes the exception cause chain
+- [x] [s01t0118](s01t0118-add-debug-gated-diagnostic-helpers.md): Rename ErrorReporter to CliReporter and grow it into the CLI output façade
+- [x] [s01t0119](s01t0119-consolidate-shared-test-helpers-across.md): Consolidate shared test helpers into tests/_helpers.py
+- [x] [s01t0120](s01t0120-add-a-safe-post-construction.md): Add a safe post-construction debug toggle to CliReporter
+- [x] [s01t0121](s01t0121-reconsider-debug-output-layout-evaluate.md): Reconsider debug_output layout — rule/divider delimiters
+- [x] [s01t0122](s01t0122-unify-debug-helper-label-idiom.md): Unify debug-helper label idiom (debug_cmd vs debug_output)

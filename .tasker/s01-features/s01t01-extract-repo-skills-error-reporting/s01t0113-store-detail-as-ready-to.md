@@ -1,5 +1,5 @@
 ---
-id: s01t13
+id: s01t0113
 slug: store-detail-as-ready-to
 status: done
 ---

@@ -1,5 +1,5 @@
 ---
-id: s01t03
+id: s01t0103
 slug: render-formatted-error
 status: done
 ---
