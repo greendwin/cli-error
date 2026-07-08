@@ -90,7 +90,7 @@ class CliReporter:
             self.debug_print("[misc]STDERR:\n{text}[/misc]", text=trimmed)
 
     @contextmanager
-    def handler(self) -> Generator[None]:
+    def handler(self) -> Generator[None, None, None]:
         """Report errors and translate them into process exit codes."""
         try:
             yield

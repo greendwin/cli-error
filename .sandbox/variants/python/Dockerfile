@@ -2,7 +2,7 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-ARG PYTHON_VERSION="3.10 3.11 3.12"
+ARG PYTHON_VERSION="3.10 3.11 3.12 3.13 3.14"
 
 # uv ships in the base image; use it to install the requested interpreters.
 RUN uv python install ${PYTHON_VERSION}

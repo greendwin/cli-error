@@ -7,7 +7,7 @@ services:
         - USERNAME=${USER}
         - UID=${HOST_UID:-1000}
         - GID=${HOST_GID:-1000}
-        - PYTHON_VERSION=${PYTHON_VERSION:-3.10 3.11 3.12}
+        - PYTHON_VERSION=${PYTHON_VERSION:-3.10 3.11 3.12 3.13 3.14}
         - PHP_VERSION=${PHP_VERSION:-8.3}
     image: ${COMPOSE_PROJECT_NAME}-${VARIANT}:latest
     stdin_open: true

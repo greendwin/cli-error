@@ -1,4 +1,5 @@
-from typing import Any, Self
+import sys
+from typing import Any
 
 from rich.console import Console
 from rich.markup import escape
@@ -9,6 +10,11 @@ from ._render import (
     render_template,
     strip_markup,
 )
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 
 class CliError(Exception):

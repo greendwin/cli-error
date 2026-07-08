@@ -1,7 +1,7 @@
 ---
 id: s01t02
 slug: support-python-3-10
-status: pending
+status: done
 ---
 
 # Support Python 3.10
