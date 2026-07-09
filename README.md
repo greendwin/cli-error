@@ -21,7 +21,7 @@ gracefully to plain text when a project opts out.
 
 ## Install
 
-`cli-error` targets **Python 3.12+**.
+`cli-error` targets **Python 3.10+**.
 The import package is `cli_error`.
 
 ```bash
@@ -205,6 +205,21 @@ console's `no_color` and theme so debug output matches your main console. Wire
 can toggle later (`reporter.debug = True`). `show_locals` sets the default for
 `debug_traceback` (see below).
 
+### Reporting without exiting
+
+`report_error(ex)` renders an exception exactly as `handler()` does — a
+`debug`-gated traceback followed by the message and its `caused by:` chain — but
+**does not exit**. Reach for it when you want to report a failure and keep
+going, e.g. logging one bad item inside a loop while continuing to the next:
+
+```python
+for item in items:
+    try:
+        process(item)
+    except Exception as err:
+        reporter.report_error(err)  # print and continue, no SystemExit
+```
+
 ### Cause chains
 
 When you re-raise with `raise … from err`, the reporter renders the underlying
@@ -292,6 +307,10 @@ uv run tox
 ```
 
 ## Release Notes
+
+### v0.2.0
+- `CliReporter.report_error(ex)` renders an error (debug-gated traceback, message, and `caused by:` chain) without exiting — for reporting non-fatal failures while continuing.
+- Now runs on Python 3.10 and 3.11 in addition to 3.12 (`requires-python >= 3.10`).
 
 ### v0.1.2
 - Debug diagnostics now share a consistent uppercase `LABEL:` grammar — `debug_cmd` emits flush-left `RUN:`/`CWD:` lines, and `debug_output` couples a single `STDOUT:`/`STDERR:` header to its output block.
